@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { toast } from "sonner"
 
 const AdminCreateSidebar = ({ open, onClose, onCreate }) => {
   const [formData, setFormData] = useState({
@@ -21,11 +22,11 @@ const AdminCreateSidebar = ({ open, onClose, onCreate }) => {
 
   const handleSubmit = () => {
     if (!formData.name.trim() || !formData.phone.trim() || !formData.password.trim()) {
-      alert("Please fill in all required fields")
+      toast.warning("Please fill in all required fields")
       return
     }
     if (formData.password.length < 6) {
-      alert("Password must be at least 6 characters")
+      toast.warning("Password must be at least 6 characters")
       return
     }
     onCreate(formData)

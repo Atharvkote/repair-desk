@@ -25,6 +25,7 @@ import { TRACTOR_SERVICE_CATALOG, PARTS_MATERIALS_CATALOG } from "@/lib/service-
 import { ClipboardList } from "lucide-react" // Import ClipboardList
 import { useLocation } from "react-router-dom"
 import { GrServices } from "react-icons/gr"
+import { toast } from "sonner"
 
 export default function ServiceForm() {
   const location = useLocation()
@@ -182,7 +183,7 @@ export default function ServiceForm() {
   }
 
   const submitOrder = () => {
-    alert(`Order created for ${selectedUser?.name} with total: ₹${finalTotal.toFixed(2)}`)
+    toast.success(`Order created for ${selectedUser?.name} with total: ₹${finalTotal.toFixed(2)}`)
     setCurrentStep(1)
     setSelectedUser(null)
     setSelections([])

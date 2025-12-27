@@ -21,6 +21,7 @@ import ServiceCatalog from './pages/service-catalog-page'
 import PartsCatalog from './pages/parts-catalog-page'
 import AdminManagement from './pages/teams-page'
 import SettingsPage from './pages/settings-page'
+import Overview from './pages/overview-page'
 
 // // Protected Route Component
 // const ProtectedRoute = ({ children }) => {
@@ -71,6 +72,7 @@ const AppRoutes = () => {
       {/* Protected  Routes */}
       {/* Root Route */}
       <Route exact path="/admin" element={<AdminLayout />}>
+        <Route index element={<Overview />} />
         <Route path='service' element={<ServiceForm />} />
         <Route path='service/list' element={<ActiveServices />} />
         <Route path='history' element={<ServiceHistory />} />

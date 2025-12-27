@@ -21,6 +21,7 @@ import ToggleTabs from "@/components/customs/toggle-tabs"
 import { TbCurrencyRupeeNepalese } from "react-icons/tb";
 import { RiEnglishInput } from "react-icons/ri";
 import { useEffect } from "react"
+import { toast } from "sonner"
 
 const SettingsPage = () => {
   const [activeTab, setActiveTab] = useState("account")
@@ -71,15 +72,15 @@ const SettingsPage = () => {
 
   const handleChangePassword = () => {
     if (passwords.new !== passwords.confirm) {
-      alert("New passwords do not match!")
+      toast.warning("New passwords do not match!")
       return
     }
     if (passwords.new.length < 6) {
-      alert("Password must be at least 6 characters long!")
+      toast.warning("Password must be at least 6 characters long!")
       return
     }
     setPasswords({ current: "", new: "", confirm: "" })
-    alert("Password changed successfully!")
+    toast.success("Password changed successfully!")
   }
 
   const settingsTabs = [

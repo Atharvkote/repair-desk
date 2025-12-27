@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { toast } from "sonner"
 
 const AdminEditSidebar = ({ admin, open, onClose, onSave }) => {
   const [formData, setFormData] = useState({ name: "", phone: "", status: "active" })
@@ -26,7 +27,7 @@ const AdminEditSidebar = ({ admin, open, onClose, onSave }) => {
 
   const handleSubmit = () => {
     if (!formData.name.trim() || !formData.phone.trim()) {
-      alert("Please fill in all required fields")
+      toast.warning("Please fill in all required fields")
       return
     }
     onSave({ ...admin, ...formData })
