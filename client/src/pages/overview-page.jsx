@@ -17,8 +17,10 @@ import {
     AlertCircle,
 } from "lucide-react"
 import { FaTractor, FaWrench } from "react-icons/fa6"
+import { useTranslation } from "react-i18next"
 
 const Overview = () => {
+    const { t } = useTranslation('common')
     const navigate = useNavigate()
     const [stats, setStats] = useState({
         services: 0,
@@ -60,7 +62,7 @@ const Overview = () => {
                             <FaWrench className="w-6 h-6 text-white" />
                         </div>
                         <h1 className="text-3xl font-bold font-bbh-bogle  text-primary">
-                            Repair <span className="text-white p-1 rounded-lg mr-2 bg-primary">Desk</span>
+                            {t("overview.repairDesk")} <span className="text-white p-1 rounded-lg mr-2 bg-primary">Desk</span>
                         </h1>
                     </div>
 
@@ -74,19 +76,18 @@ const Overview = () => {
                     <div className="space-y-6 text-left">
                         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary/10 border border-primary/20">
                             {/* <FaTractor className="w-4 h-4 text-primary" /> */}
-                            <span className="text-md uppercase font-bold text-primary tracking-widest">mate tractors</span>
+                            <span className="text-md uppercase font-bold text-primary tracking-widest">{t("overview.mateTractors")}</span>
                         </div>
 
                         <h2 className="text-5xl md:text-6xl font-bold text-foreground leading-tight mx-auto">
-                            Manage Services & Parts with{" "}
+                            {t("overview.manageServicesParts")}{" "}
                             <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                                Powerful Controls
+                                {t("overview.powerfulControls")}
                             </span>
                         </h2>
 
                         <p className="text-xl text-muted-foreground  mx-auto leading-relaxed">
-                            An intuitive admin dashboard designed to streamline your inventory management, service tracking, and team
-                            administration with real-time analytics.
+                            {t("overview.dashboardDescription")}
                         </p>
 
                         <div className="flex flex-col sm:flex-row gap-4 pt-6">
@@ -94,14 +95,14 @@ const Overview = () => {
                                 onClick={() => navigate("/admin/service")}
                                 className="h-12 px-8 cursor-pointer bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white font-semibold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl group"
                             >
-                                Get Started
+                                {t("overview.getStarted")}
                                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                             </Button>
                             <Button
                                 variant="outline"
                                 className="h-12 px-8 cursor-pointer border-2 border-primary hover:border-primary hover:bg-teal-600 font-semibold rounded-lg transition-all duration-300 bg-transparent"
                             >
-                                Learn More
+                                {t("overview.learnMore")}
                             </Button>
                         </div>
                     </div>

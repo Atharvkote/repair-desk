@@ -31,8 +31,10 @@ import { FaHome } from "react-icons/fa";
 import { MdCreateNewFolder, MdFolderShared, MdMiscellaneousServices, MdOutlineMiscellaneousServices } from "react-icons/md";
 import { FaFolder } from "react-icons/fa";
 import { FaFolderOpen, FaUserClock } from "react-icons/fa6"
+import { useTranslation } from "react-i18next"
 
 export default function Sidebar() {
+  const { t } = useTranslation('sidebar')
   const { pathname } = useLocation()
   const [openMenus, setOpenMenus] = useState({
     catalog: pathname.startsWith("/admin/catalog"),
@@ -44,39 +46,39 @@ export default function Sidebar() {
 
   const sections = [
     {
-      title: "Workspace",
+      title: t("workspace"),
       items: [
-        { label: "Overview", icon: FaHome, href: "/admin" },
+        { label: t("overview"), icon: FaHome, href: "/admin" },
         {
-          label: "Services",
+          label: t("services"),
           icon: FaFolderOpen ,
           href: "#",
           id: "services",
           subItems: [
-            { label: "New Service", icon: PlusIcon, href: "/admin/service" },
-            { label: "Active Services", icon: MdFolderShared , href: "/admin/service/list" },
+            { label: t("newService"), icon: PlusIcon, href: "/admin/service" },
+            { label: t("activeServices"), icon: MdFolderShared , href: "/admin/service/list" },
           ],
         },
-        { label: "History", icon: FaUserClock , href: "/admin/history" },
+        { label: t("history"), icon: FaUserClock , href: "/admin/history" },
         {
-          label: "Catalog",
+          label: t("catalog"),
           icon: SiBookstack,
           href: "#",
           id: "catalog",
           subItems: [
-            { label: "Service Catalog", icon: BookOpen, href: "/admin/catalog/services" },
-            { label: "Parts Catalog", icon: Package, href: "/admin/catalog/parts" },
+            { label: t("serviceCatalog"), icon: BookOpen, href: "/admin/catalog/services" },
+            { label: t("partsCatalog"), icon: Package, href: "/admin/catalog/parts" },
           ],
         },
-        { label: "Reports", icon: IoBarChartSharp, href: "/admin/reports" },
+        { label: t("reports"), icon: IoBarChartSharp, href: "/admin/reports" },
       ],
     },
     {
-      title: "Admin",
+      title: t("admin"),
       items: [
-        { label: "Company", icon: AppWindowMacIcon, href: "/admin/company" },
-        { label: "Teams", icon: Users2, href: "/admin/teams" },
-        { label: "Settings", icon: Settings, href: "/admin/settings" },
+        { label: t("company"), icon: AppWindowMacIcon, href: "/admin/company" },
+        { label: t("teams"), icon: Users2, href: "/admin/teams" },
+        { label: t("settings"), icon: Settings, href: "/admin/settings" },
       ],
     },
   ]
@@ -92,8 +94,8 @@ export default function Sidebar() {
             <img src="/logo.png" alt="logo" className="w-11 h-11 rounded-md" />
           </div>
           <div className="flex flex-col">
-            <h1 className="font-bold text-[17px] text-slate-900 tracking-tight leading-tight">Mate Tractors</h1>
-            <p className="text-[11px] font-extrabold text-teal-600/80 uppercase tracking-widest  mt-0.5">Service Admin</p>
+            <h1 className="font-bold text-[17px] text-slate-900 tracking-tight leading-tight">{t("mateTractors")}</h1>
+            <p className="text-[11px] font-extrabold text-teal-600/80 uppercase tracking-widest  mt-0.5">{t("serviceAdmin")}</p>
           </div>
         </Link>
       </div>
@@ -205,14 +207,14 @@ export default function Sidebar() {
         <div className="space-y-1">
           <button className="flex items-center gap-3.5 px-4 py-2.5 w-full rounded-xl text-slate-600 hover:text-slate-900 hover:bg-white hover:shadow-sm transition-all duration-200 group">
             <Bell className="w-[18px] h-[18px] text-slate-400 group-hover:text-teal-500" />
-            <span className="text-[13.5px] font-medium">Notifications</span>
+            <span className="text-[13.5px] font-medium">{t("notifications")}</span>
             <span className="ml-auto w-5 h-5 bg-teal-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
               3
             </span>
           </button>
           <button className="flex items-center gap-3.5 px-4 py-2.5 w-full rounded-xl text-rose-600 hover:bg-rose-50/80 transition-all duration-200 group">
             <LogOut className="w-[18px] h-[18px] group-hover:translate-x-0.5 transition-transform" />
-            <span className="text-[13.5px] font-medium">Sign Out</span>
+            <span className="text-[13.5px] font-medium">{t("signOut")}</span>
           </button>
         </div>
       </div>

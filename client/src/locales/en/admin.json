@@ -1,0 +1,94 @@
+{
+  "createService": {
+    "title": "Create Service",
+    "description": "Add a new service",
+    "serviceName": "Service Name",
+    "description": "Description",
+    "price": "Price",
+    "status": "Status",
+    "available": "Available",
+    "unavailable": "Unavailable",
+    "create": "Create",
+    "cancel": "Cancel"
+  },
+  "editService": {
+    "title": "Edit Service",
+    "description": "Update service details",
+    "save": "Save Changes",
+    "cancel": "Cancel"
+  },
+  "viewService": {
+    "title": "Service Details",
+    "serviceName": "Service Name",
+    "description": "Description",
+    "price": "Price",
+    "status": "Status",
+    "available": "Available",
+    "unavailable": "Unavailable",
+    "close": "Close"
+  },
+  "createPart": {
+    "title": "Create Part",
+    "description": "Add a new part to inventory",
+    "partName": "Part Name",
+    "description": "Description",
+    "price": "Price",
+    "stock": "Stock Quantity",
+    "status": "Status",
+    "inStock": "In Stock",
+    "lowStock": "Low Stock",
+    "outOfStock": "Out of Stock",
+    "create": "Create",
+    "cancel": "Cancel"
+  },
+  "editPart": {
+    "title": "Edit Part",
+    "description": "Update part details",
+    "save": "Save Changes",
+    "cancel": "Cancel"
+  },
+  "viewPart": {
+    "title": "Part Details",
+    "partName": "Part Name",
+    "description": "Description",
+    "price": "Price",
+    "stock": "Stock",
+    "status": "Status",
+    "inStock": "In Stock",
+    "lowStock": "Low Stock",
+    "outOfStock": "Out of Stock",
+    "close": "Close"
+  },
+  "createAdmin": {
+    "title": "Create Admin",
+    "description": "Add a new team admin",
+    "name": "Full Name",
+    "phone": "Phone Number",
+    "email": "Email Address",
+    "password": "Password",
+    "status": "Status",
+    "active": "Active",
+    "inactive": "Inactive",
+    "create": "Create",
+    "cancel": "Cancel",
+    "fillAllFields": "Please fill in all required fields",
+    "passwordMinLength": "Password must be at least 6 characters"
+  },
+  "editAdmin": {
+    "title": "Edit Admin",
+    "description": "Update admin details",
+    "save": "Save Changes",
+    "cancel": "Cancel"
+  },
+  "viewAdmin": {
+    "title": "Admin Details",
+    "name": "Name",
+    "phone": "Phone",
+    "email": "Email",
+    "status": "Status",
+    "active": "Active",
+    "inactive": "Inactive",
+    "close": "Close"
+  }
+}
+

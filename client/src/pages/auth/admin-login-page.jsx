@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Lock, Mail, ArrowRight, CheckCircle2 } from "lucide-react"
 import { FaLock } from "react-icons/fa6"
+import { useTranslation } from "react-i18next"
 
 const Login = () => {
+  const { t } = useTranslation('common')
   const navigate = useNavigate()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -20,7 +22,7 @@ const Login = () => {
     setError("")
 
     if (!email.trim() || !password.trim()) {
-      setError("Please fill in all fields")
+      setError(t("auth.pleaseFillAllFields"))
       return
     }
 
@@ -52,21 +54,21 @@ const Login = () => {
             {/* Heading */}
             <div className="space-y-4">
               <h1 className="text-5xl font-bold text-foreground leading-tight">
-                Manage Your{" "}
+                {t("login.manageServices")}{" "}
                 <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                  Services
+                  {t("login.services")}
                 </span>{" "}
-                &{" "}
-                <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">Parts</span>
+                {t("login.and")}{" "}
+                <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">{t("login.parts")}</span>
               </h1>
               <p className="text-lg text-foreground max-w-md mx-auto">
-                Powerful admin dashboard to manage your entire inventory and service catalog effortlessly
+                {t("login.dashboardDescription")}
               </p>
             </div>
 
             {/* Features */}
             <div className="space-y-3 pt-4">
-              {["Real-time inventory tracking", "Complete service management", "Advanced analytics & reports"].map(
+              {[t("login.realTimeTracking"), t("login.serviceManagement"), t("login.analyticsReports")].map(
                 (feature, i) => (
                   <div
                     key={i}
@@ -92,8 +94,8 @@ const Login = () => {
               <div className="inline-flex lg:hidden items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary/70 mb-4">
                 <Lock className="w-6 h-6 text-white" />
               </div>
-              <h2 className="text-4xl font-bold text-white flex items-center gap-3"><FaLock className="w-8 h-8" /> Welcome back</h2>
-              <p className="text-sm text-white">Sign in to your admin account to continue</p>
+              <h2 className="text-4xl font-bold text-white flex items-center gap-3"><FaLock className="w-8 h-8" /> {t("auth.welcomeBack")}</h2>
+              <p className="text-sm text-white">{t("auth.signInToAccount")}</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -105,7 +107,7 @@ const Login = () => {
 
               {/* Email Field */}
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-white">Email Address</label>
+                <label className="text-sm font-semibold text-white">{t("auth.emailAddress")}</label>
                 <div className="relative group">
                   <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white group-focus-within:text-white transition-colors" />
                   <Input
@@ -133,9 +135,9 @@ const Login = () => {
               {/* Password Field */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-sm font-semibold text-white">Password</label>
+                  <label className="text-sm font-semibold text-white">{t("auth.password")}</label>
                   <a href="#" className="text-xs text-white hover:underline">
-                    Forgot password?
+                    {t("auth.forgotPassword")}
                   </a>
                 </div>
                 <div className="relative group">
@@ -205,11 +207,11 @@ const Login = () => {
                 {isLoading ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Signing in...
+                    {t("auth.signingIn")}
                   </>
                 ) : (
                   <>
-                    Sign In
+                    {t("auth.signIn")}
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </>
                 )}

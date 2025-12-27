@@ -7,8 +7,10 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "sonner"
+import { useTranslation } from "react-i18next"
 
 const AdminCreateSidebar = ({ open, onClose, onCreate }) => {
+  const { t } = useTranslation('admin')
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -22,11 +24,11 @@ const AdminCreateSidebar = ({ open, onClose, onCreate }) => {
 
   const handleSubmit = () => {
     if (!formData.name.trim() || !formData.phone.trim() || !formData.password.trim()) {
-      toast.warning("Please fill in all required fields")
+      toast.warning(t("createAdmin.fillAllFields"))
       return
     }
     if (formData.password.length < 6) {
-      toast.warning("Password must be at least 6 characters")
+      toast.warning(t("createAdmin.passwordMinLength"))
       return
     }
     onCreate(formData)
@@ -57,8 +59,8 @@ const AdminCreateSidebar = ({ open, onClose, onCreate }) => {
                 <Plus className="h-5 w-5" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold">Create New Admin</h2>
-                <p className="text-teal-100 text-xs">Add new admin to team</p>
+                <h2 className="text-lg font-semibold">{t("createAdmin.title")}</h2>
+                <p className="text-teal-100 text-xs">{t("createAdmin.description")}</p>
               </div>
             </div>
             <Button
@@ -76,62 +78,62 @@ const AdminCreateSidebar = ({ open, onClose, onCreate }) => {
             <div className="flex-1 overflow-y-auto p-5 space-y-4">
               <div>
                 <Label htmlFor="new-admin-name" className="text-sm font-medium">
-                  Full Name *
+                  {t("createAdmin.name")} *
                 </Label>
                 <Input
                   id="new-admin-name"
                   value={formData.name}
                   onChange={(e) => handleChange("name", e.target.value)}
-                  placeholder="Enter admin name"
+                  placeholder={t("createAdmin.name")}
                   className="mt-2"
                 />
               </div>
 
               <div>
                 <Label htmlFor="new-admin-phone" className="text-sm font-medium">
-                  Phone Number *
+                  {t("createAdmin.phone")} *
                 </Label>
                 <Input
                   id="new-admin-phone"
                   value={formData.phone}
                   onChange={(e) => handleChange("phone", e.target.value)}
-                  placeholder="Enter phone number"
+                  placeholder={t("createAdmin.phone")}
                   className="mt-2"
                 />
               </div>
 
               <div>
                 <Label htmlFor="new-admin-password" className="text-sm font-medium">
-                  Password *
+                  {t("createAdmin.password")} *
                 </Label>
                 <Input
                   id="new-admin-password"
                   type="password"
                   value={formData.password}
                   onChange={(e) => handleChange("password", e.target.value)}
-                  placeholder="Enter password (min 6 characters)"
+                  placeholder={t("createAdmin.password")}
                   className="mt-2"
                 />
               </div>
 
               <div>
                 <Label htmlFor="new-admin-status" className="text-sm font-medium">
-                  Status
+                  {t("createAdmin.status")}
                 </Label>
                 <Select value={formData.status} onValueChange={(value) => handleChange("status", value)}>
                   <SelectTrigger id="new-admin-status" className="mt-2">
-                    <SelectValue placeholder="Select status" />
+                    <SelectValue placeholder={t("createAdmin.status")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
+                    <SelectItem value="active">{t("createAdmin.active")}</SelectItem>
+                    <SelectItem value="inactive">{t("createAdmin.inactive")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               {/* Info Box */}
               <div className="bg-teal-50 border border-teal-200 rounded-lg p-3 mt-4">
-                <p className="text-xs text-teal-700 font-medium">Password must be at least 6 characters long.</p>
+                <p className="text-xs text-teal-700 font-medium">{t("createAdmin.passwordMinLength")}</p>
               </div>
             </div>
 
@@ -139,10 +141,10 @@ const AdminCreateSidebar = ({ open, onClose, onCreate }) => {
             <div className="border-t border-border p-4 bg-white flex gap-2">
               <Button onClick={handleSubmit} className="flex-1 bg-teal-600 hover:bg-teal-700 text-white gap-2">
                 <Plus className="w-4 h-4" />
-                Create Admin
+                {t("createAdmin.create")}
               </Button>
               <Button onClick={onClose} variant="outline" className="flex-1 bg-transparent">
-                Cancel
+                {t("createAdmin.cancel")}
               </Button>
             </div>
           </div>

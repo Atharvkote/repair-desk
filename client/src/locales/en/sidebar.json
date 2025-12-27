@@ -1,0 +1,21 @@
+{
+  "workspace": "Workspace",
+  "overview": "Overview",
+  "services": "Services",
+  "newService": "New Service",
+  "activeServices": "Active Services",
+  "history": "History",
+  "catalog": "Catalog",
+  "serviceCatalog": "Service Catalog",
+  "partsCatalog": "Parts Catalog",
+  "reports": "Reports",
+  "admin": "Admin",
+  "company": "Company",
+  "teams": "Teams",
+  "settings": "Settings",
+  "mateTractors": "Mate Tractors",
+  "serviceAdmin": "Service Admin",
+  "notifications": "Notifications",
+  "signOut": "Sign Out"
+}
+

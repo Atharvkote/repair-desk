@@ -12,8 +12,10 @@ import { RiAdminFill } from "react-icons/ri"
 import { GrUserAdmin } from "react-icons/gr"
 import { MdAdminPanelSettings } from "react-icons/md"
 import { FaEye, FaTrash } from "react-icons/fa6"
+import { useTranslation } from "react-i18next"
 
 const AdminManagement = () => {
+  const { t } = useTranslation('pages')
   const [admins, setAdmins] = useState([
     { id: "1", name: "John Doe", phone: "+91 9876543210", email: "john@example.com", status: "active" },
     { id: "2", name: "Jane Smith", phone: "+91 9876543211", email: "jane@example.com", status: "active" },
@@ -64,8 +66,8 @@ const AdminManagement = () => {
       <div className="bg-white p-6 rounded-xl border border-border shadow-sm space-y-6">
 
         <div className="space-y-2 ">
-          <h1 className="text-2xl font-bold text-teal-600 flex items-center gap-2"><MdAdminPanelSettings className="w-8 h-8" /> Teams</h1>
-          <p className="text-muted-foreground">Create, manage, and view all team admins</p>
+          <h1 className="text-2xl font-bold text-teal-600 flex items-center gap-2"><MdAdminPanelSettings className="w-8 h-8" /> {t("teams.title")}</h1>
+          <p className="text-muted-foreground">{t("teams.description")}</p>
         </div>
 
         {/* Actions */}
@@ -75,13 +77,13 @@ const AdminManagement = () => {
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by name, email, or phone..."
+              placeholder={t("teams.searchPlaceholder")}
               className="pl-9 border-2 border-teal-600"
             />
           </div>
           <Button onClick={() => setCreateSidebarOpen(true)} className="bg-teal-600 hover:bg-teal-700 text-white gap-2">
             <Plus className="w-4 h-4" />
-            New Admin
+            {t("teams.newAdmin")}
           </Button>
         </div>
       </div>
@@ -90,11 +92,11 @@ const AdminManagement = () => {
         <table className="w-full">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Name</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Email</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Phone</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">{t("teams.name")}</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">{t("teams.email")}</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">{t("teams.phone")}</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">{t("teams.status")}</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">{t("teams.actions")}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
@@ -112,7 +114,7 @@ const AdminManagement = () => {
                           : "bg-gray-100 text-gray-800 border-gray-300"
                       }
                     >
-                      {admin.status.charAt(0).toUpperCase() + admin.status.slice(1)}
+                      {admin.status === "active" ? t("teams.active") : t("teams.inactive")}
                     </Badge>
                   </td>
                   <td className="px-6 py-4">
@@ -145,7 +147,7 @@ const AdminManagement = () => {
             ) : (
               <tr>
                 <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
-                  No admins found
+                  {t("teams.noAdminsFound")}
                 </td>
               </tr>
             )}

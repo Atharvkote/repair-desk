@@ -26,8 +26,10 @@ import { ClipboardList } from "lucide-react" // Import ClipboardList
 import { useLocation } from "react-router-dom"
 import { GrServices } from "react-icons/gr"
 import { toast } from "sonner"
+import { useTranslation } from "react-i18next"
 
 export default function ServiceForm() {
+  const { t } = useTranslation('pages')
   const location = useLocation()
 
   const [userQuery, setUserQuery] = useState("")
@@ -208,17 +210,17 @@ export default function ServiceForm() {
   }
 
   const steps = [
-    { id: 1, name: "Customer", icon: User },
-    { id: 2, name: "Services", icon: Package },
-    { id: 3, name: "Discounts", icon: Percent },
-    { id: 4, name: "Review", icon: ClipboardCheck },
+    { id: 1, name: t("stepForm.customer"), icon: User },
+    { id: 2, name: t("stepForm.services"), icon: Package },
+    { id: 3, name: t("stepForm.discounts"), icon: Percent },
+    { id: 4, name: t("stepForm.review"), icon: ClipboardCheck },
   ]
 
   return (
     <div className="w-full max-w-6xl mx-auto space-y-6 pb-24 md:pb-12 relative">
       <div className="bg-white rounded-3xl border border-slate-200/60 p-6 md:p-8 shadow-sm mb-8">
-        <h1 className="text-2xl font-bold text-teal-600 flex items-center gap-2"> <GrServices /> New Service</h1>
-        <p className="text-foreground font-medium mb-3"> Create Service with ease and keep track of everything you do.  </p>
+        <h1 className="text-2xl font-bold text-teal-600 flex items-center gap-2"> <GrServices /> {t("stepForm.title")}</h1>
+        <p className="text-foreground font-medium mb-3"> {t("stepForm.description")}  </p>
         <div className="relative flex justify-between items-start max-w-3xl mx-auto">
           {/* Progress Line */}
           <div className="absolute top-5 left-0 w-full h-0.5 bg-slate-100 -z-0">
@@ -254,7 +256,7 @@ export default function ServiceForm() {
                   <span
                     className={`text-[10px] font-bold uppercase tracking-wider ${isActive ? "text-teal-600" : "text-slate-400"}`}
                   >
-                    Step {step.id}
+                    {t("stepForm.step")} {step.id}
                   </span>
                   <span
                     className={`text-[13px] font-bold whitespace-nowrap ${isActive ? "text-slate-900" : "text-slate-400"}`}
@@ -282,20 +284,20 @@ export default function ServiceForm() {
             {currentStep === 1 && (
               <div className="space-y-8">
                 <div className="space-y-1">
-                  <h3 className="text-2xl font-bold text-slate-900 tracking-tight">Customer & Tractor Details</h3>
-                  <p className="text-slate-500 text-[15px]">Identify the customer and the equipment being serviced.</p>
+                  <h3 className="text-2xl font-bold text-slate-900 tracking-tight">{t("stepForm.customerTractorDetails")}</h3>
+                  <p className="text-slate-500 text-[15px]">{t("stepForm.customerTractorDescription")}</p>
                 </div>
 
                 <div className="space-y-4">
                   <label className="text-sm font-bold text-slate-700 block tracking-wide uppercase">
-                    Search Customer
+                    {t("stepForm.searchCustomer")}
                   </label>
                   <div className="relative group">
                     <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-teal-500 transition-colors" />
                     <Input
                       value={userQuery}
                       onChange={(e) => setUserQuery(e.target.value)}
-                      placeholder="Search by name, phone, or email..."
+                      placeholder={t("stepForm.searchPlaceholder")}
                       className="pl-12 bg-slate-50/50 border-slate-200 h-12 rounded-xl focus:bg-white focus:ring-2 focus:ring-teal-500/20 transition-all text-[15px]"
                     />
                   </div>
@@ -304,7 +306,7 @@ export default function ServiceForm() {
                 <div className="max-h-[280px] overflow-y-auto rounded-2xl border border-slate-100 bg-slate-50/30 divide-y divide-slate-100/80 custom-scrollbar">
                   {results.length === 0 ? (
                     <div className="p-8 text-center text-slate-400 font-medium italic">
-                      No matching customers found.
+                      {t("stepForm.noMatchingCustomers")}
                     </div>
                   ) : (
                     results.map((u) => (
@@ -343,25 +345,25 @@ export default function ServiceForm() {
                 <div className="border-t border-slate-100 pt-8 space-y-5">
                   <div className="flex items-center gap-2 text-slate-900">
                     <UserPlus2 className="w-5 h-5 text-teal-600" />
-                    <span className="text-base font-bold tracking-tight">Register New Customer</span>
+                    <span className="text-base font-bold tracking-tight">{t("stepForm.registerNewCustomer")}</span>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <Input
                       value={newUser.name}
                       onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-                      placeholder="Full Name"
+                      placeholder={t("stepForm.fullName")}
                       className="h-11 rounded-xl bg-slate-50/50"
                     />
                     <Input
                       value={newUser.phone}
                       onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })}
-                      placeholder="Phone Number"
+                      placeholder={t("stepForm.phoneNumber")}
                       className="h-11 rounded-xl bg-slate-50/50"
                     />
                     <Input
                       value={newUser.email}
                       onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                      placeholder="Email Address"
+                      placeholder={t("stepForm.emailAddress")}
                       className="h-11 rounded-xl bg-slate-50/50"
                     />
                   </div>
@@ -377,25 +379,25 @@ export default function ServiceForm() {
                     }}
                   >
                     <Plus className="w-4 h-4 mr-2" />
-                    Register & Select
+                    {t("stepForm.registerSelect")}
                   </Button>
                 </div>
 
                 <div className="border-t border-slate-100 pt-8 space-y-4">
                   <label className="text-sm font-bold text-slate-700 block tracking-wide uppercase">
-                    Tractor Model Details
+                    {t("stepForm.tractorModelDetails")}
                   </label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Input
                       value={tractor.name}
                       onChange={(e) => setTractor({ ...tractor, name: e.target.value })}
-                      placeholder="Make / Brand (e.g. John Deere)"
+                      placeholder={t("stepForm.makeBrand")}
                       className="h-11 rounded-xl bg-slate-50/50"
                     />
                     <Input
                       value={tractor.model}
                       onChange={(e) => setTractor({ ...tractor, model: e.target.value })}
-                      placeholder="Model Number"
+                      placeholder={t("stepForm.modelNumber")}
                       className="h-11 rounded-xl bg-slate-50/50"
                     />
                   </div>
@@ -408,17 +410,17 @@ export default function ServiceForm() {
               <div className="space-y-8">
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                   <div className="space-y-1">
-                    <h3 className="text-2xl font-bold text-slate-900 tracking-tight">Services & Components</h3>
+                    <h3 className="text-2xl font-bold text-slate-900 tracking-tight">{t("stepForm.servicesComponents")}</h3>
                     <p className="text-slate-500 text-[15px]">
-                      Selected for: <span className="font-bold text-teal-600">{selectedUser?.name}</span>
+                      {t("stepForm.selectedFor")}: <span className="font-bold text-teal-600">{selectedUser?.name}</span>
                     </p>
                   </div>
                   <ToggleTabs
                     options={[
-                      { label: "Services", icon: <IoSettingsSharp className="w-4 h-4" /> },
-                      { label: "Parts/Materials", icon: <FaBoxArchive className="w-4 h-4" /> },
+                      { label: t("stepForm.services"), icon: <IoSettingsSharp className="w-4 h-4" /> },
+                      { label: t("stepForm.partsMaterials"), icon: <FaBoxArchive className="w-4 h-4" /> },
                     ]}
-                    defaultActive="Services"
+                    defaultActive={t("stepForm.services")}
                     onChange={setActiveTab}
                     className="bg-slate-100/50 border-none p-1 rounded-xl"
                   />
@@ -431,27 +433,27 @@ export default function ServiceForm() {
                       <Plus className="w-4 h-4 text-white" />
                     </div>
                     <span className="text-base font-bold text-teal-900">
-                      Add Custom {activeTab === "Services" ? "Service" : "Item"}
+                      {t("stepForm.addCustomService")}
                     </span>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
                     <Input
                       value={customTitle}
                       onChange={(e) => setCustomTitle(e.target.value)}
-                      placeholder={activeTab === "Services" ? "Service Title" : "Item Name"}
+                      placeholder={t("stepForm.serviceName")}
                       className="md:col-span-2 h-11 rounded-xl bg-white border-teal-100/50"
                     />
                     <Input
                       type="number"
                       value={customPrice}
                       onChange={(e) => setCustomPrice(e.target.value)}
-                      placeholder="Price (₹)"
+                      placeholder={t("stepForm.price") + " (₹)"}
                       className="h-11 rounded-xl bg-white border-teal-100/50"
                     />
                     <Input
                       value={customDesc}
                       onChange={(e) => setCustomDesc(e.target.value)}
-                      placeholder="Brief Description"
+                      placeholder={t("stepForm.description")}
                       className="md:col-span-2 h-11 rounded-xl bg-white border-teal-100/50"
                     />
                   </div>
@@ -459,7 +461,7 @@ export default function ServiceForm() {
                     className="bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-xl px-6 h-11 shadow-lg shadow-teal-500/20 transition-all active:scale-95"
                     onClick={addCustomService}
                   >
-                    Confirm & Add
+                    {t("stepForm.add")}
                   </Button>
                 </div>
 
@@ -737,8 +739,8 @@ export default function ServiceForm() {
             <div className="w-1.5 h-1.5 rounded-full bg-white animate-bounce" />
             <p className="text-[13px] font-medium text-white">
               {currentStep === 4
-                ? "Verify details before finalizing order."
-                : `Next: ${steps[currentStep]?.name || "Finalize"}`}
+                ? t("stepForm.verifyDetails")
+                : `${t("stepForm.next")}: ${steps[currentStep]?.name || "Finalize"}`}
             </p>
           </div>
           <div className="flex items-center gap-4 w-full md:w-auto">
@@ -749,7 +751,7 @@ export default function ServiceForm() {
                 onClick={handlePrevious}
               >
                 <ChevronLeft className="w-4 h-4 mr-2" />
-                Back
+                {t("stepForm.previous")}
               </Button>
             )}
             <Button
@@ -762,11 +764,11 @@ export default function ServiceForm() {
               {currentStep === 4 ? (
                 <>
                   <Check className="w-5 h-5 mr-2" />
-                  Finalize Order
+                  {t("stepForm.submit")}
                 </>
               ) : (
                 <>
-                  Continue
+                  {t("stepForm.next")}
                   <ChevronRight className="w-5 h-5 ml-2" />
                 </>
               )}

@@ -10,7 +10,10 @@ import ServiceEditSidebar from "@/components/admin/catalogs/service-edit-sidebar
 import ServiceCreateSidebar from "@/components/admin/catalogs/service-create-sidebar"
 import { MdEdit, MdOutlineMiscellaneousServices } from "react-icons/md";
 import { FaEye, FaTrash } from "react-icons/fa6"
+import { useTranslation } from "react-i18next"
+
 const ServiceCatalog = () => {
+  const { t } = useTranslation('pages')
   const [services, setServices] = useState([
     { id: "1", name: "Oil Change", description: "Regular engine oil replacement", price: 500, status: "available" },
     {
@@ -65,8 +68,8 @@ const ServiceCatalog = () => {
         <div className="bg-white p-6 rounded-xl border border-border shadow-sm space-y-5">
 
                 <div className="space-y-2">
-                    <h1 className="text-2xl font-bold text-teal-600 flex items-center gap-2"><MdOutlineMiscellaneousServices className="w-8 h-8" /> Service CatalogService Catalog</h1>
-                    <p className="text-muted-foreground">Manage and view all available services</p>
+                    <h1 className="text-2xl font-bold text-teal-600 flex items-center gap-2"><MdOutlineMiscellaneousServices className="w-8 h-8" /> {t("serviceCatalog.title")}</h1>
+                    <p className="text-muted-foreground">{t("serviceCatalog.description")}</p>
                 </div>
 
                 {/* Actions */}
@@ -76,13 +79,13 @@ const ServiceCatalog = () => {
                         <Input
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder="Search services..."
+                            placeholder={t("serviceCatalog.searchPlaceholder")}
                             className="pl-9 border-2 border-teal-600"
                         />
                     </div>
                     <Button onClick={() => setCreateSidebarOpen(true)} className="bg-primary cursor-pointer hover:bg-primary/90 text-white gap-2">
                         <Plus className="w-4 h-4" />
-                        New Service
+                        {t("serviceCatalog.newService")}
                     </Button>
                 </div>
             </div>
@@ -91,11 +94,11 @@ const ServiceCatalog = () => {
         <table className="w-full">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Service Name</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Description</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Price</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">{t("serviceCatalog.serviceName")}</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">{t("serviceCatalog.description")}</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">{t("serviceCatalog.price")}</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">{t("serviceCatalog.status")}</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">{t("serviceCatalog.actions")}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
@@ -138,7 +141,7 @@ const ServiceCatalog = () => {
             ) : (
               <tr>
                 <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
-                  No services found
+                  {t("serviceCatalog.noServicesFound")}
                 </td>
               </tr>
             )}

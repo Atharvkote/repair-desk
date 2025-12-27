@@ -8,10 +8,10 @@ import Navabr from './components/layout/client/blended-navabr'
 import Footer from './components/layout/client/blended-footer'
 
 // Pages
-import Home from './pages/home-page'
+import Home from './pages/client/landing-page'
 import NotFound from './pages/not-found-page'
-import Login from './pages/auth/login-page'
-import Register from './pages/auth/register-page'
+import Login from './pages/auth/admin-login-page'
+import Register from './pages/auth/client-register-page'
 import Loader from './components/utils/loader'
 import ServiceForm from './components/admin/service-management/step-form'
 import AdminLayout from './components/layout/admin-layout'
@@ -53,7 +53,7 @@ const AppRoutes = () => {
       <Route
         path='/'
         element={
-          <ServiceForm />
+          <Home />
         }
       />
       <Route
@@ -95,12 +95,13 @@ const App = () => {
   const NoNavbarRoutes = [];
   const NoFooterRoutes = [];
   const pathname = useLocation().pathname;
+  const isAdminRoute = pathname.startsWith('/admin');
 
   return (
     <Fragment>
-      {!NoNavbarRoutes.includes(pathname) && <Navabr />}
+      {!NoNavbarRoutes.includes(pathname) && !isAdminRoute && <Navabr />}
       <AppRoutes />
-      {!NoFooterRoutes.includes(pathname) && <Footer />}
+      {!NoFooterRoutes.includes(pathname) && !isAdminRoute && <Footer />}
     </Fragment>
   )
 }

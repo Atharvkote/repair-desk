@@ -12,8 +12,10 @@ import PartsCreateSidebar from "@/components/admin/catalogs/parts-create-sidebar
 import { IoExtensionPuzzleSharp } from "react-icons/io5";
 import { MdEdit } from "react-icons/md"
 import { FaEye, FaTrash } from "react-icons/fa6"
+import { useTranslation } from "react-i18next"
 
 const PartsCatalog = () => {
+    const { t } = useTranslation('pages')
     const [parts, setParts] = useState([
         {
             id: "1",
@@ -84,8 +86,8 @@ const PartsCatalog = () => {
             <div className="bg-white p-6 rounded-xl border border-border shadow-sm space-y-5">
 
                 <div className="space-y-2 ">
-                    <h1 className="text-2xl font-bold text-teal-600 flex items-center gap-2"><IoExtensionPuzzleSharp className="w-8 h-8" /> Parts & Materials Catalog</h1>
-                    <p className="text-muted-foreground">Manage inventory and view all available parts</p>
+                    <h1 className="text-2xl font-bold text-teal-600 flex items-center gap-2"><IoExtensionPuzzleSharp className="w-8 h-8" /> {t("partsCatalog.title")}</h1>
+                    <p className="text-muted-foreground">{t("partsCatalog.description")}</p>
                 </div>
 
                 {/* Actions */}
@@ -95,13 +97,13 @@ const PartsCatalog = () => {
                         <Input
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder="Search parts..."
+                            placeholder={t("partsCatalog.searchPlaceholder")}
                             className="pl-9 border-2 border-teal-600"
                         />
                     </div>
                     <Button onClick={() => setCreateSidebarOpen(true)} className="cursor-pointer bg-primary hover:bg-primary/90 text-white gap-2">
                         <Plus className="w-4 h-4" />
-                        New Part
+                        {t("partsCatalog.newPart")}
                     </Button>
                 </div>
             </div>
@@ -118,11 +120,11 @@ const PartsCatalog = () => {
 
                             <div className="grid grid-cols-2 gap-2 text-sm">
                                 <div>
-                                    <p className="text-muted-foreground">Price</p>
+                                    <p className="text-muted-foreground">{t("partsCatalog.price")}</p>
                                     <p className="text-xl font-bold text-primary">₹{part.price}</p>
                                 </div>
                                 <div>
-                                    <p className="text-muted-foreground">Stock</p>
+                                    <p className="text-muted-foreground">{t("partsCatalog.stock")}</p>
                                     <p className="text-xl font-bold text-foreground">{part.stock}</p>
                                 </div>
                             </div>
@@ -134,17 +136,17 @@ const PartsCatalog = () => {
                                         : "bg-yellow-100 text-yellow-800 border-yellow-300"
                                 }
                             >
-                                {part.status === "in-stock" ? "In Stock" : "Low Stock"}
+                                {part.status === "in-stock" ? t("partsCatalog.inStock") : t("partsCatalog.lowStock")}
                             </Badge>
 
                             <div className="flex gap-2 pt-2 border-t  border-border">
                                 <Button onClick={() => handleView(part)} variant="outline" size="sm" className="flex-1 gap-2 text-white cursor-pointer">
                                     <FaEye className="w-4 h-4" />
-                                    View
+                                    {t("partsCatalog.view")}
                                 </Button>
                                 <Button onClick={() => handleEdit(part)} variant="outline" size="sm" className="flex-1 gap-2 text-white cursor-pointer">
                                     <MdEdit className="w-4 h-4" />
-                                    Edit
+                                    {t("partsCatalog.edit")}
                                 </Button>
                                 <Button
                                     onClick={() => handleDelete(part.id)}

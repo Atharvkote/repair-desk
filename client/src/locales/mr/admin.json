@@ -1,0 +1,94 @@
+{
+  "createService": {
+    "title": "सेवा तयार करा",
+    "description": "नवीन सेवा जोडा",
+    "serviceName": "सेवा नाव",
+    "description": "वर्णन",
+    "price": "किंमत",
+    "status": "स्थिती",
+    "available": "उपलब्ध",
+    "unavailable": "अनुपलब्ध",
+    "create": "तयार करा",
+    "cancel": "रद्द करा"
+  },
+  "editService": {
+    "title": "सेवा संपादित करा",
+    "description": "सेवा तपशील अपडेट करा",
+    "save": "बदल जतन करा",
+    "cancel": "रद्द करा"
+  },
+  "viewService": {
+    "title": "सेवा तपशील",
+    "serviceName": "सेवा नाव",
+    "description": "वर्णन",
+    "price": "किंमत",
+    "status": "स्थिती",
+    "available": "उपलब्ध",
+    "unavailable": "अनुपलब्ध",
+    "close": "बंद करा"
+  },
+  "createPart": {
+    "title": "भाग तयार करा",
+    "description": "इन्व्हेंटरीमध्ये नवीन भाग जोडा",
+    "partName": "भाग नाव",
+    "description": "वर्णन",
+    "price": "किंमत",
+    "stock": "स्टॉक प्रमाण",
+    "status": "स्थिती",
+    "inStock": "स्टॉकमध्ये",
+    "lowStock": "कमी स्टॉक",
+    "outOfStock": "स्टॉक संपला",
+    "create": "तयार करा",
+    "cancel": "रद्द करा"
+  },
+  "editPart": {
+    "title": "भाग संपादित करा",
+    "description": "भाग तपशील अपडेट करा",
+    "save": "बदल जतन करा",
+    "cancel": "रद्द करा"
+  },
+  "viewPart": {
+    "title": "भाग तपशील",
+    "partName": "भाग नाव",
+    "description": "वर्णन",
+    "price": "किंमत",
+    "stock": "स्टॉक",
+    "status": "स्थिती",
+    "inStock": "स्टॉकमध्ये",
+    "lowStock": "कमी स्टॉक",
+    "outOfStock": "स्टॉक संपला",
+    "close": "बंद करा"
+  },
+  "createAdmin": {
+    "title": "व्यवस्थापक तयार करा",
+    "description": "नवीन संघ व्यवस्थापक जोडा",
+    "name": "पूर्ण नाव",
+    "phone": "फोन नंबर",
+    "email": "ईमेल पत्ता",
+    "password": "पासवर्ड",
+    "status": "स्थिती",
+    "active": "सक्रिय",
+    "inactive": "निष्क्रिय",
+    "create": "तयार करा",
+    "cancel": "रद्द करा",
+    "fillAllFields": "कृपया सर्व आवश्यक फील्ड भरा",
+    "passwordMinLength": "पासवर्ड किमान 6 वर्ण असावा"
+  },
+  "editAdmin": {
+    "title": "व्यवस्थापक संपादित करा",
+    "description": "व्यवस्थापक तपशील अपडेट करा",
+    "save": "बदल जतन करा",
+    "cancel": "रद्द करा"
+  },
+  "viewAdmin": {
+    "title": "व्यवस्थापक तपशील",
+    "name": "नाव",
+    "phone": "फोन",
+    "email": "ईमेल",
+    "status": "स्थिती",
+    "active": "सक्रिय",
+    "inactive": "निष्क्रिय",
+    "close": "बंद करा"
+  }
+}
+

@@ -1,0 +1,21 @@
+{
+  "workspace": "कार्यक्षेत्र",
+  "overview": "आढावा",
+  "services": "सेवा",
+  "newService": "नवीन सेवा",
+  "activeServices": "सक्रिय सेवा",
+  "history": "इतिहास",
+  "catalog": "कॅटलॉग",
+  "serviceCatalog": "सेवा कॅटलॉग",
+  "partsCatalog": "भाग कॅटलॉग",
+  "reports": "अहवाल",
+  "admin": "व्यवस्थापक",
+  "company": "कंपनी",
+  "teams": "संघ",
+  "settings": "सेटिंग्ज",
+  "mateTractors": "मेट ट्रॅक्टर्स",
+  "serviceAdmin": "सेवा व्यवस्थापक",
+  "notifications": "सूचना",
+  "signOut": "साइन आउट"
+}
+

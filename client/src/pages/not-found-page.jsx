@@ -3,8 +3,10 @@ import { Link, useNavigate } from "react-router-dom"
 import { Home, ArrowLeft, Heart, Shield, Search } from "lucide-react"
 import { useIsMobile } from "@/lib/use-mobile"
 import FuzzyText from "@/components/customs/fuzzy-text"
+import { useTranslation } from "react-i18next"
 
 export default function NotFound() {
+  const { t } = useTranslation('common')
   const [mounted, setMounted] = useState(false)
   const isMobile = useIsMobile()
   const navigate = useNavigate()
@@ -16,10 +18,10 @@ export default function NotFound() {
   }, [])
 
   const quickLinks = [
-    { icon: Home, label: "Home", href: "/", description: "Return to main page" },
-    { icon: Heart, label: "Register", href: "/register", description: "Create new account" },
-    { icon: Shield, label: "Login", href: "/login", description: "Access your account" },
-    { icon: Search, label: "Help", href: "/help", description: "Get assistance" },
+    { icon: Home, label: t("common.home"), href: "/", description: t("common.returnToMainPage") },
+    { icon: Heart, label: t("common.register"), href: "/register", description: t("common.createNewAccount") },
+    { icon: Shield, label: t("common.login"), href: "/login", description: t("common.accessYourAccount") },
+    { icon: Search, label: t("common.help"), href: "/help", description: t("common.help") },
   ]
 
   return (
@@ -33,7 +35,7 @@ export default function NotFound() {
           <div className="w-full flex flex-col lg:flex-row gap-4  items-center">
             <div className="text-center mb-6 sm:mb-8 flex flex-col items-center gap-4">
               <h1 className="text-3xl  sm:text-4xl lg:text-5xl font-bold text-white mb-2">
-                Page Not Found
+                {t("notFound.pageNotFound")}
               </h1>
               <FuzzyText
                 baseIntensity={0.2}
@@ -43,14 +45,13 @@ export default function NotFound() {
                 404
               </FuzzyText>
               <p className="text-foreground text-sm sm:text-base leading-relaxed">
-                The page you're looking for doesn't exist or has been moved. This could be due to a mistyped URL or an
-                outdated link.
+                {t("notFound.pageNotFoundDescription")}
               </p>
             </div>
 
             {/* Quick Actions */}
             <div className="w-full space-y-3 mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 text-center mb-4">Quick Actions</h3>
+              <h3 className="text-lg font-semibold text-gray-900 text-center mb-4">{t("notFound.quickActions")}</h3>
 
               {quickLinks.map((link, index) => (
                 <button
@@ -78,7 +79,7 @@ export default function NotFound() {
               className="w-full flex items-center justify-center px-4 sm:px-6 py-3 sm:py-4 border border-transparent rounded-xl sm:rounded-2xl text-sm sm:text-base font-medium text-white bg-gradient-to-r from-teal-800 to-teal-900 hover:from-teal-900 hover:to-teal-950 transition-all duration-200"
             >
               <Home className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-              Return to Home
+              {t("notFound.returnToHome")}
             </Link>
 
             <button
@@ -86,7 +87,7 @@ export default function NotFound() {
               className="w-full flex items-center justify-center px-4 sm:px-6 py-3 sm:py-4 border-2 border-teal-800 rounded-xl sm:rounded-2xl text-sm sm:text-base font-medium text-teal-800 bg-white hover:bg-teal-50 transition-all duration-200"
             >
               <ArrowLeft className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-              Go Back
+              {t("notFound.goBack")}
             </button>
           </div>
 
@@ -97,8 +98,8 @@ export default function NotFound() {
                 <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-teal-800" />
               </div>
               <div>
-                <p className="text-white font-medium text-xs sm:text-sm">Secure Navigation</p>
-                <p className="text-white/70 text-xs">All links are verified and secure</p>
+                <p className="text-white font-medium text-xs sm:text-sm">{t("notFound.secureNavigation")}</p>
+                <p className="text-white/70 text-xs">{t("notFound.secureNavigationDescription")}</p>
               </div>
             </div>
           </div>
@@ -106,7 +107,7 @@ export default function NotFound() {
           {/* Help Text */}
           <div className="mt-4 text-center">
             <p className="text-xs sm:text-sm text-gray-500">
-              If you continue to experience issues, please contact our support team
+              {t("notFound.supportMessage")}
             </p>
           </div>
         </div>

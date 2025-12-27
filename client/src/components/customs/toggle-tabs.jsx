@@ -1,10 +1,17 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 
 export default function ToggleTabs({ options, defaultActive, onChange, className = "" }) {
   const [activeTab, setActiveTab] = useState(defaultActive || options?.[0]?.label)
+
+  // Sync with external defaultActive changes
+  useEffect(() => {
+    if (defaultActive) {
+      setActiveTab(defaultActive)
+    }
+  }, [defaultActive])
 
   const handleChange = (label) => {
     setActiveTab(label)

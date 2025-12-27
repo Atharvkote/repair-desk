@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -20,10 +20,13 @@ import { IoMdSettings } from "react-icons/io";
 import ToggleTabs from "@/components/customs/toggle-tabs"
 import { TbCurrencyRupeeNepalese } from "react-icons/tb";
 import { RiEnglishInput } from "react-icons/ri";
-import { useEffect } from "react"
 import { toast } from "sonner"
+import { useLanguage } from "@/hooks/useLanguage"
+import { useTranslation } from "react-i18next"
 
 const SettingsPage = () => {
+  const { currentLanguage, changeLanguage } = useLanguage()
+  const { t } = useTranslation('common')
   const [activeTab, setActiveTab] = useState("account")
   const [currentUser, setCurrentUser] = useState({
     name: "John Doe",
@@ -31,7 +34,6 @@ const SettingsPage = () => {
     phone: "+91 9876543210",
   })
 
-  const [language, setLanguage] = useState("english")
   const [showPassword, setShowPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [editingAccount, setEditingAccount] = useState(false)
@@ -41,17 +43,15 @@ const SettingsPage = () => {
     confirm: "",
   })
 
-  useEffect(() => {
-    // Load saved language preference from localStorage
-    const savedLanguage = localStorage.getItem("preferredLanguage")
-    if (savedLanguage) {
-      setLanguage(savedLanguage)
-    }
-  }, [language])
+  const handleLanguageChange = (label) => {
+    // Map label to language code
+    const langCode = label === "English" ? "en" : "mr"
+    changeLanguage(langCode)
+  }
 
-  const handleLanguageChange = (lang) => {
-    setLanguage(lang)
-    localStorage.setItem("preferredLanguage", lang)
+  // Get current language label for display
+  const getCurrentLanguageLabel = () => {
+    return currentLanguage === "mr" ? "मराठी" : "English"
   }
 
 
@@ -72,22 +72,22 @@ const SettingsPage = () => {
 
   const handleChangePassword = () => {
     if (passwords.new !== passwords.confirm) {
-      toast.warning("New passwords do not match!")
+      toast.warning(t("settings.passwordsDoNotMatch"))
       return
     }
     if (passwords.new.length < 6) {
-      toast.warning("Password must be at least 6 characters long!")
+      toast.warning(t("settings.passwordTooShort"))
       return
     }
     setPasswords({ current: "", new: "", confirm: "" })
-    toast.success("Password changed successfully!")
+    toast.success(t("settings.passwordChangedSuccess"))
   }
 
   const settingsTabs = [
-    { id: "account", label: "Account", icon: User },
-    { id: "security", label: "Security", icon: Lock },
-    { id: "preferences", label: "Preferences", icon: Globe },
-    { id: "notifications", label: "Notifications", icon: Bell },
+    { id: "account", label: t("settings.account"), icon: User },
+    { id: "security", label: t("settings.security"), icon: Lock },
+    { id: "preferences", label: t("settings.preferences"), icon: Globe },
+    { id: "notifications", label: t("settings.notifications"), icon: Bell },
   ]
 
   return (
@@ -98,8 +98,8 @@ const SettingsPage = () => {
         <div className="w-56 bg-white border-r border-border">
           {/* Header */}
           <div className="p-6 border-b border-border">
-            <h1 className="text-2xl font-bold text-foreground flex items-center gap-2 text-teal-600"> <IoMdSettings className="w-8 h-8" /> Settings</h1>
-            <p className="text-sm text-muted-foreground mt-1">Manage your account</p>
+            <h1 className="text-2xl font-bold text-foreground flex items-center gap-2 text-teal-600"> <IoMdSettings className="w-8 h-8" /> {t("settings.title")}</h1>
+            <p className="text-sm text-muted-foreground mt-1">{t("settings.manageAccount")}</p>
           </div>
 
           {/* Settings Menu */}
@@ -130,7 +130,7 @@ const SettingsPage = () => {
             {activeTab === "account" && (
               <div className="max-w-2xl space-y-6">
                 <div>
-                  <h2 className="text-2xl font-bold text-foreground mb-6">Account Information</h2>
+                  <h2 className="text-2xl font-bold text-foreground mb-6">{t("settings.accountInformation")}</h2>
 
                   {/* User Info Card */}
                   <div className="bg-teal-50 rounded-lg p-6 border border-teal-200 mb-6">
@@ -149,7 +149,7 @@ const SettingsPage = () => {
                         onClick={() => setEditingAccount(true)}
                         className="w-full bg-teal-600 hover:bg-teal-700 text-white cursor-pointer"
                       >
-                        Edit Account
+                        {t("settings.editAccount")}
                       </Button>
                     )}
                   </div>
@@ -159,50 +159,50 @@ const SettingsPage = () => {
                     <div className="bg-white border border-border rounded-lg p-6 space-y-4">
                       <div>
                         <Label htmlFor="name" className="text-sm font-medium">
-                          Full Name
+                          {t("settings.fullName")}
                         </Label>
                         <Input
                           id="name"
                           value={accountForm.name}
                           onChange={(e) => handleAccountChange("name", e.target.value)}
-                          placeholder="Enter your full name"
+                          placeholder={t("settings.enterFullName")}
                           className="mt-2"
                         />
                       </div>
 
                       <div>
                         <Label htmlFor="email" className="text-sm font-medium">
-                          Email Address
+                          {t("settings.emailAddress")}
                         </Label>
                         <Input
                           id="email"
                           type="email"
                           value={accountForm.email}
                           onChange={(e) => handleAccountChange("email", e.target.value)}
-                          placeholder="Enter your email"
+                          placeholder={t("settings.enterEmail")}
                           className="mt-2"
                         />
                       </div>
 
                       <div>
                         <Label htmlFor="phone" className="text-sm font-medium">
-                          Phone Number
+                          {t("settings.phoneNumber")}
                         </Label>
                         <Input
                           id="phone"
                           value={accountForm.phone}
                           onChange={(e) => handleAccountChange("phone", e.target.value)}
-                          placeholder="Enter your phone number"
+                          placeholder={t("settings.enterPhoneNumber")}
                           className="mt-2"
                         />
                       </div>
 
                       <div className="flex gap-3 pt-4">
                         <Button onClick={handleSaveAccount} className="flex-1 bg-teal-600 hover:bg-teal-700 text-white cursor-pointer">
-                          Save Changes
+                          {t("settings.saveChanges")}
                         </Button>
                         <Button onClick={() => setEditingAccount(false)} variant="outline" className="flex-1 text-white cursor-pointer">
-                          Cancel
+                          {t("settings.cancel")}
                         </Button>
                       </div>
                     </div>
@@ -214,15 +214,15 @@ const SettingsPage = () => {
                       <table className="w-full">
                         <tbody>
                           <tr className="border-b border-border">
-                            <td className="px-6 py-3 bg-gray-50 font-medium text-sm text-muted-foreground">Name</td>
+                            <td className="px-6 py-3 bg-gray-50 font-medium text-sm text-muted-foreground">{t("settings.name")}</td>
                             <td className="px-6 py-3 text-foreground">{currentUser.name}</td>
                           </tr>
                           <tr className="border-b border-border">
-                            <td className="px-6 py-3 bg-gray-50 font-medium text-sm text-muted-foreground">Email</td>
+                            <td className="px-6 py-3 bg-gray-50 font-medium text-sm text-muted-foreground">{t("settings.email")}</td>
                             <td className="px-6 py-3 text-foreground">{currentUser.email}</td>
                           </tr>
                           <tr>
-                            <td className="px-6 py-3 bg-gray-50 font-medium text-sm text-muted-foreground">Phone</td>
+                            <td className="px-6 py-3 bg-gray-50 font-medium text-sm text-muted-foreground">{t("settings.phone")}</td>
                             <td className="px-6 py-3 text-foreground">{currentUser.phone}</td>
                           </tr>
                         </tbody>
@@ -236,18 +236,18 @@ const SettingsPage = () => {
             {/* Security Tab */}
             {activeTab === "security" && (
               <div className="max-w-2xl space-y-6">
-                <h2 className="text-2xl font-bold text-foreground">Security Settings</h2>
+                <h2 className="text-2xl font-bold text-foreground">{t("settings.securitySettings")}</h2>
 
                 {/* Change Password */}
                 <div className="bg-white border border-border rounded-lg p-6">
                   <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
                     <Shield className="w-5 h-5 text-teal-600" />
-                    Change Password
+                    {t("settings.changePassword")}
                   </h3>
                   <div className="space-y-4">
                     <div>
                       <Label htmlFor="current-password" className="text-sm font-medium">
-                        Current Password
+                        {t("settings.currentPassword")}
                       </Label>
                       <div className="relative mt-2">
                         <Input
@@ -255,7 +255,7 @@ const SettingsPage = () => {
                           type={showPassword ? "text" : "password"}
                           value={passwords.current}
                           onChange={(e) => handlePasswordChange("current", e.target.value)}
-                          placeholder="Enter current password"
+                          placeholder={t("settings.enterCurrentPassword")}
                         />
                         <button
                           onClick={() => setShowPassword(!showPassword)}
@@ -268,7 +268,7 @@ const SettingsPage = () => {
 
                     <div>
                       <Label htmlFor="new-password" className="text-sm font-medium">
-                        New Password
+                        {t("settings.newPassword")}
                       </Label>
                       <div className="relative mt-2">
                         <Input
@@ -276,7 +276,7 @@ const SettingsPage = () => {
                           type={showNewPassword ? "text" : "password"}
                           value={passwords.new}
                           onChange={(e) => handlePasswordChange("new", e.target.value)}
-                          placeholder="Enter new password"
+                          placeholder={t("settings.enterNewPassword")}
                         />
                         <button
                           onClick={() => setShowNewPassword(!showNewPassword)}
@@ -289,14 +289,14 @@ const SettingsPage = () => {
 
                     <div>
                       <Label htmlFor="confirm-password" className="text-sm font-medium">
-                        Confirm Password
+                        {t("settings.confirmPassword")}
                       </Label>
                       <Input
                         id="confirm-password"
                         type="password"
                         value={passwords.confirm}
                         onChange={(e) => handlePasswordChange("confirm", e.target.value)}
-                        placeholder="Confirm new password"
+                        placeholder={t("settings.confirmNewPassword")}
                         className="mt-2"
                       />
                     </div>
@@ -305,7 +305,7 @@ const SettingsPage = () => {
                       onClick={handleChangePassword}
                       className="w-full bg-teal-600 cursor-pointer hover:bg-teal-700 text-white mt-4"
                     >
-                      Update Password
+                      {t("settings.updatePassword")}
                     </Button>
                   </div>
                 </div>
@@ -314,29 +314,28 @@ const SettingsPage = () => {
                 <div className="bg-red-50 border border-red-200 rounded-lg p-6">
                   <h3 className="text-lg font-semibold text-red-600 mb-4 flex items-center gap-2">
                     <AlertTriangle className="w-5 h-5" />
-                    Delete Account
+                    {t("settings.deleteAccount")}
                   </h3>
                   <p className="text-sm text-red-700 mb-4">
-                    This action cannot be undone. All your data will be permanently deleted.
+                    {t("settings.deleteAccountWarning")}
                   </p>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button className="bg-red-600 cursor-pointer hover:bg-red-700 text-white gap-2">
                         <Trash2 className="w-4 h-4" />
-                        Delete Account
+                        {t("settings.deleteAccount")}
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Account</AlertDialogTitle>
+                        <AlertDialogTitle>{t("settings.deleteAccount")}</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Are you sure you want to delete your account? This action cannot be undone and all your data
-                          will be permanently removed.
+                          {t("settings.deleteAccountConfirm")}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <div className="flex gap-3">
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction>
+                        <AlertDialogCancel>{t("settings.cancel")}</AlertDialogCancel>
+                        <AlertDialogAction className="bg-red-600 hover:bg-red-700">{t("settings.delete")}</AlertDialogAction>
                       </div>
                     </AlertDialogContent>
                   </AlertDialog>
@@ -347,34 +346,33 @@ const SettingsPage = () => {
             {/* Preferences Tab */}
             {activeTab === "preferences" && (
               <div className="max-w-2xl space-y-6">
-                <h2 className="text-2xl font-bold text-foreground">Preferences</h2>
+                <h2 className="text-2xl font-bold text-foreground">{t("settings.preferences")}</h2>
 
                 {/* Language Selection */}
                 <div className="bg-white border border-border rounded-lg p-6">
                   <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
                     <Globe className="w-5 h-5 text-teal-600" />
-                    Language
+                    {t("settings.language")}
                   </h3>
                   <div className="space-y-4">
                     <div>
                       <Label htmlFor="language" className="text-sm font-medium ">
-                        Select Language
+                        {t("settings.selectLanguage")}
                       </Label>
                       <ToggleTabs
+                        key={currentLanguage}
                         options={[
                           { label: "English", icon: <RiEnglishInput className="w-4 h-4" /> },
                           { label: "मराठी", icon: <TbCurrencyRupeeNepalese className="w-4 h-4" /> },
                         ]}
-                        defaultActive="English"
+                        defaultActive={getCurrentLanguageLabel()}
                         onChange={handleLanguageChange}
                         className="bg-slate-100/50 border-none p-1 my-2 cursor-pointer rounded-xl"
                       />
                       <p className="text-xs text-muted-foreground mt-2">
-                        Selected Language: {language === "english" ? "English" : "मराठी"}
+                        {t("settings.selectedLanguage")}: {getCurrentLanguageLabel()}
                       </p>
                     </div>
-
-                    <Button className="w-full cursor-pointer bg-teal-600 hover:bg-teal-700 text-white mt-4">Save Preferences</Button>
                   </div>
                 </div>
               </div>
@@ -383,31 +381,31 @@ const SettingsPage = () => {
             {/* Notifications Tab */}
             {activeTab === "notifications" && (
               <div className="max-w-2xl space-y-6">
-                <h2 className="text-2xl font-bold text-foreground">Notifications</h2>
+                <h2 className="text-2xl font-bold text-foreground">{t("settings.notifications")}</h2>
 
                 <div className="bg-white border border-border rounded-lg overflow-hidden">
                   <table className="w-full">
                     <thead className="bg-gray-50 border-b border-border">
                       <tr>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Notification Type</th>
-                        <th className="px-6 py-3 text-center text-sm font-semibold text-foreground">Enabled</th>
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">{t("settings.notificationType")}</th>
+                        <th className="px-6 py-3 text-center text-sm font-semibold text-foreground">{t("settings.enabled")}</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr className="border-b border-border hover:bg-gray-50">
-                        <td className="px-6 py-3 text-sm text-foreground">Email Notifications</td>
+                        <td className="px-6 py-3 text-sm text-foreground">{t("settings.emailNotifications")}</td>
                         <td className="px-6 py-3 text-center">
                           <input type="checkbox" defaultChecked className="w-4 h-4 cursor-pointer" />
                         </td>
                       </tr>
                       <tr className="border-b border-border hover:bg-gray-50">
-                        <td className="px-6 py-3 text-sm text-foreground">Service Updates</td>
+                        <td className="px-6 py-3 text-sm text-foreground">{t("settings.serviceUpdates")}</td>
                         <td className="px-6 py-3 text-center">
                           <input type="checkbox" defaultChecked className="w-4 h-4 cursor-pointer" />
                         </td>
                       </tr>
                       <tr className="hover:bg-gray-50">
-                        <td className="px-6 py-3 text-sm text-foreground">Admin Alerts</td>
+                        <td className="px-6 py-3 text-sm text-foreground">{t("settings.adminAlerts")}</td>
                         <td className="px-6 py-3 text-center">
                           <input type="checkbox" defaultChecked className="w-4 h-4 cursor-pointer" />
                         </td>
