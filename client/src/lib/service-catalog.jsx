@@ -1,0 +1,103 @@
+export const TRACTOR_SERVICE_CATALOG = [
+  {
+    id: "oil-change",
+    title: "Oil Change",
+    description: "Complete engine oil change and filter replacement",
+    price: 1500,
+    category: "service",
+  },
+  {
+    id: "filter-replacement",
+    title: "Filter Replacement",
+    description: "Air, fuel, and hydraulic filter replacement",
+    price: 2000,
+    category: "service",
+  },
+  {
+    id: "tire-service",
+    title: "Tire Service",
+    description: "Tire rotation, balance, and pressure check",
+    price: 2500,
+    category: "service",
+  },
+  {
+    id: "battery-check",
+    title: "Battery Check",
+    description: "Battery testing and terminal cleaning",
+    price: 800,
+    category: "service",
+  },
+  {
+    id: "brake-inspection",
+    title: "Brake Inspection",
+    description: "Brake system inspection and adjustment",
+    price: 3000,
+    category: "service",
+  },
+  {
+    id: "hydraulic-fluid",
+    title: "Hydraulic Fluid Change",
+    description: "Hydraulic system fluid replacement",
+    price: 3500,
+    category: "service",
+  },
+]
+
+export const PARTS_MATERIALS_CATALOG = [
+  {
+    id: "engine-oil",
+    title: "Engine Oil (5L)",
+    description: "Premium synthetic engine oil",
+    price: 800,
+    category: "parts",
+  },
+  {
+    id: "air-filter",
+    title: "Air Filter",
+    description: "High-efficiency air filter",
+    price: 450,
+    category: "parts",
+  },
+  {
+    id: "fuel-filter",
+    title: "Fuel Filter",
+    description: "Premium fuel filter cartridge",
+    price: 350,
+    category: "parts",
+  },
+  {
+    id: "spark-plugs",
+    title: "Spark Plugs (Set of 4)",
+    description: "High-performance spark plugs",
+    price: 600,
+    category: "parts",
+  },
+  {
+    id: "battery",
+    title: "Tractor Battery",
+    description: "Heavy-duty tractor battery 12V 75Ah",
+    price: 5500,
+    category: "parts",
+  },
+  {
+    id: "brake-fluid",
+    title: "Brake Fluid (2L)",
+    description: "DOT 4 brake fluid",
+    price: 400,
+    category: "parts",
+  },
+  {
+    id: "hydraulic-oil",
+    title: "Hydraulic Oil (20L)",
+    description: "Premium hydraulic system oil",
+    price: 2500,
+    category: "parts",
+  },
+  {
+    id: "belts",
+    title: "Drive Belts",
+    description: "Replacement drive belts set",
+    price: 1200,
+    category: "parts",
+  },
+]
