@@ -40,15 +40,12 @@ import { socketioLogger, redisLogger } from "./utils/logger.js";
 // Database configs
 import { connectDB, disconnectDB } from "./configs/mongodb.config.js";
 
-// Example placeholder routers (uncomment/replace with your own routers)
-// import authRouter from "./routes/auth.routes.js";
-// import apiRouter from "./routes/api.routes.js";
 
 // Connect MongoDB
 await connectDB();
 
 const app = express();
-const SERVER_PORT = process.env.SERVER_PORT || 5000;
+const SERVER_PORT = process.env.SERVER_PORT;
 const server = http.createServer(app);
 
 server.keepAliveTimeout = 65000;
@@ -57,7 +54,8 @@ server.headersTimeout = 66000;
 // Redis connection with error handling
 let redisClient;
 try {
-  redisClient = new Redis(process.env.REDIS_URL || "redis://localhost:6379", {
+  console.log("Connecting to Redis at", process.env.REDIS_URL);
+  redisClient = new Redis(process.env.REDIS_URL, {
     retryStrategy: (times) => {
       const delay = Math.min(times * 50, 2000);
       logger.warn(`Redis reconnecting in ${delay}ms (attempt ${times})`);
@@ -120,6 +118,7 @@ app.use(
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:9090",
+  // Add your allowed production origins here
   // "https://your-production-domain.com",
 ];
 app.use(
