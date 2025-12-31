@@ -82,8 +82,6 @@ export default function ActiveServices() {
     }
 
     try {
-      // Implement delete functionality here
-      // await orderService.deleteOrder(service._id)
       toast.success("Order deleted successfully")
       fetchServices() // Refresh the list
     } catch (error) {

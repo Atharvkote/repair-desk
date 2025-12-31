@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "type": "module",
+  "packageManager": "pnpm@10.18.0",
   "dependencies": {
     "@socket.io/redis-streams-adapter": "^0.2.3",
     "bcryptjs": "^3.0.3",

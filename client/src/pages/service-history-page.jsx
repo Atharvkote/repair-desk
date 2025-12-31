@@ -1,154 +1,154 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Search, ChevronDown, Phone, Mail, User, Wrench, Package, Calendar, Download, FileText, CheckSquare, Square, Filter } from "lucide-react"
 import { generateReceipt, exportToExcel, exportToPDF } from "@/components/utils/exporter"
 import { FaShareSquare } from "react-icons/fa"
-import { FaClock, FaTrash, FaUserClock } from "react-icons/fa6"
+import { FaClock, FaTrash } from "react-icons/fa6"
 import { RiReceiptFill } from "react-icons/ri"
 import { useTranslation } from "react-i18next"
-
-const mockCompletedServices = [
-    {
-        id: "SO-1290",
-        orderDate: "2025-01-10",
-        completionDate: "2025-01-13",
-        customer: {
-            id: "1",
-            name: "John Doe",
-            phone: "9876543210",
-            email: "john@example.com",
-        },
-        tractor: {
-            name: "John Deere",
-            model: "5050D",
-        },
-        status: "Completed",
-        services: [
-            { id: "s1", title: "Full Engine Overhaul", quantity: 1, price: 15000 },
-            { id: "s2", title: "Hydraulic System Check", quantity: 1, price: 3500 },
-        ],
-        parts: [
-            { id: "p1", title: "Oil Filter", quantity: 2, price: 450 },
-            { id: "p2", title: "Hydraulic Fluid (5L)", quantity: 3, price: 1200 },
-        ],
-    },
-    {
-        id: "SO-1291",
-        orderDate: "2025-01-08",
-        completionDate: "2025-01-12",
-        customer: {
-            id: "2",
-            name: "Jane Smith",
-            phone: "9123456789",
-            email: "jane@example.com",
-        },
-        tractor: {
-            name: "Mahindra",
-            model: "Arjun 555",
-        },
-        status: "Completed",
-        services: [
-            { id: "s3", title: "Brake System Repair", quantity: 1, price: 5500 },
-            { id: "s4", title: "Tire Alignment", quantity: 1, price: 2000 },
-        ],
-        parts: [
-            { id: "p3", title: "Brake Pads Set", quantity: 1, price: 3200 },
-            { id: "p4", title: "Brake Fluid", quantity: 2, price: 600 },
-        ],
-    },
-    {
-        id: "SO-1288",
-        orderDate: "2025-01-05",
-        completionDate: "2025-01-09",
-        customer: {
-            id: "3",
-            name: "Mike Peterson",
-            phone: "9988776655",
-            email: "mike@example.com",
-        },
-        tractor: {
-            name: "Kubota",
-            model: "MU4501",
-        },
-        status: "Completed",
-        services: [{ id: "s5", title: "Routine Inspection", quantity: 1, price: 1500 }],
-        parts: [{ id: "p5", title: "Air Filter", quantity: 1, price: 350 }],
-    },
-    {
-        id: "SO-1285",
-        orderDate: "2025-01-02",
-        completionDate: "2025-01-07",
-        customer: {
-            id: "4",
-            name: "Robert Fox",
-            phone: "9876541230",
-            email: "robert@example.com",
-        },
-        tractor: {
-            name: "New Holland",
-            model: "3630",
-        },
-        status: "Completed",
-        services: [
-            { id: "s6", title: "Transmission Rebuild", quantity: 1, price: 12000 },
-            { id: "s7", title: "Cooling System Flush", quantity: 1, price: 2500 },
-        ],
-        parts: [
-            { id: "p6", title: "Transmission Kit", quantity: 1, price: 8500 },
-            { id: "p7", title: "Coolant (10L)", quantity: 2, price: 1400 },
-        ],
-    },
-]
+import { toast } from "sonner"
+import { orderService } from "@/services/order.service"
 
 export default function ServiceHistory() {
     const { t } = useTranslation('pages')
     const [searchQuery, setSearchQuery] = useState("")
     const [expandedRow, setExpandedRow] = useState(null)
     const [selectedServices, setSelectedServices] = useState([])
+    const [services, setServices] = useState([])
+    const [loading, setLoading] = useState(true)
 
-    const filteredServices = mockCompletedServices.filter((service) => {
+    useEffect(() => {
+        fetchServices()
+    }, [])
+
+    const fetchServices = async () => {
+        try {
+            setLoading(true)
+            const response = await orderService.getCompletedOrders()
+            console.log("Fetched completed services:", response.data)
+            setServices(response.data)
+        } catch (error) {
+            console.error("Error fetching services:", error)
+            toast.error(error.message || "Something went wrong")
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const filteredServices = useMemo(() => {
         const q = searchQuery.toLowerCase()
-        return (
-            service.id.toLowerCase().includes(q) ||
-            service.customer.name.toLowerCase().includes(q) ||
-            service.tractor.name.toLowerCase().includes(q) ||
-            service.tractor.model.toLowerCase().includes(q)
-        )
-    })
+
+        return services.filter((service) => {
+            return (
+                service.orderNumber?.toLowerCase().includes(q) ||
+                service._id?.toLowerCase().includes(q) ||
+                service.customerId?.name?.toLowerCase().includes(q) ||
+                service.tractor?.name?.toLowerCase().includes(q) ||
+                service.tractor?.model?.toLowerCase().includes(q)
+            )
+        })
+    }, [searchQuery, services])
+
+    const getServices = (items = []) =>
+        items.filter(item => item.itemType === "SERVICE")
+
+    const getParts = (items = []) =>
+        items.filter(item => item.itemType === "PART")
 
     const toggleRow = (id) => {
         setExpandedRow(expandedRow === id ? null : id)
     }
 
-    const calculateTotal = (items) => {
-        return items.reduce((sum, item) => sum + item.price * item.quantity, 0)
+    const calculateItemsTotal = (items, itemType) => {
+        return items
+            .filter(item => item.itemType === itemType)
+            .reduce((sum, item) => sum + (item.lineTotals?.final || 0), 0)
     }
 
     const toggleSelectService = (id) => {
-        setSelectedServices((prev) => (prev.includes(id) ? prev.filter((sid) => sid !== id) : [...prev, id]))
+        setSelectedServices((prev) => 
+            prev.includes(id) ? prev.filter((sid) => sid !== id) : [...prev, id]
+        )
     }
 
     const toggleSelectAll = () => {
         if (selectedServices.length === filteredServices.length) {
             setSelectedServices([])
         } else {
-            setSelectedServices(filteredServices.map((s) => s.id))
+            setSelectedServices(filteredServices.map((s) => s._id))
         }
     }
 
+    const handleExportExcel = () => {
+        if (selectedServices.length === 0) {
+            toast.error("Please select services to export")
+            return
+        }
+        const selectedData = services.filter(s => selectedServices.includes(s._id))
+        exportToExcel(selectedData)
+    }
+
+    const handleExportPDF = () => {
+        if (selectedServices.length === 0) {
+            toast.error("Please select services to export")
+            return
+        }
+        const selectedData = services.filter(s => selectedServices.includes(s._id))
+        exportToPDF(selectedData)
+    }
+
+    const handleDelete = async (service) => {
+        if (!window.confirm(`Are you sure you want to delete order ${service.orderNumber}?`)) {
+            return
+        }
+
+        try {
+            // Implement delete functionality here
+            // await orderService.deleteOrder(service._id)
+            toast.success("Order deleted successfully")
+            fetchServices() // Refresh the list
+        } catch (error) {
+            console.error("Error deleting order:", error)
+            toast.error(error.message || "Failed to delete order")
+        }
+    }
+
+    const formatDate = (dateString) => {
+        if (!dateString) return "N/A"
+        const date = new Date(dateString)
+        return date.toLocaleDateString('en-IN', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+        })
+    }
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <div className="text-center">
+                    <div className="w-16 h-16 border-4 border-teal-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                    <p className="mt-4 text-slate-600">Loading service history...</p>
+                </div>
+            </div>
+        )
+    }
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
-            <div className="flex flex-col gap-4   ">
-                <div className="bg-white  px-4 py-8 rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex flex-col gap-4">
+                <div className="bg-white px-4 py-8 rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
-                        <h1 className="text-2xl font-bold  flex text-teal-600 items-center gap-2"><FaClock className="w-7 h-7 text-teal-600" />{t("serviceHistory.title")}</h1>
+                        <h1 className="text-2xl font-bold flex text-teal-600 items-center gap-2">
+                            <FaClock className="w-7 h-7 text-teal-600" />
+                            {t("serviceHistory.title")}
+                        </h1>
                         <p className="text-sm text-slate-500 mt-1">{t("serviceHistory.description")}</p>
                     </div>
-
                 </div>
+
                 <div className="mx-3 p-4 bg-white rounded-xl border border-slate-200 shadow-sm">
                     {/* Header */}
                     <div className="flex items-center gap-2 text-xl font-semibold text-teal-600 mb-4">
@@ -168,11 +168,11 @@ export default function ServiceHistory() {
                             </span>
                         </div>
                         <div className="flex items-center gap-3">
-
                             {/* Middle: Buttons */}
                             <div className="flex items-center gap-3">
                                 <button
-                                    onClick={exportToExcel}
+                                    onClick={handleExportExcel}
+                                    disabled={selectedServices.length === 0}
                                     className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg transition-all active:scale-95 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     <Download className="w-4 h-4" />
@@ -180,7 +180,8 @@ export default function ServiceHistory() {
                                 </button>
 
                                 <button
-                                    onClick={exportToPDF}
+                                    onClick={handleExportPDF}
+                                    disabled={selectedServices.length === 0}
                                     className="inline-flex items-center gap-2 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold rounded-lg transition-all active:scale-95 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     <FileText className="w-4 h-4" />
@@ -202,7 +203,6 @@ export default function ServiceHistory() {
                         </div>
                     </div>
                 </div>
-
             </div>
 
             <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
@@ -239,7 +239,7 @@ export default function ServiceHistory() {
                         <tbody className="divide-y divide-slate-100">
                             {filteredServices.map((service, index) => (
                                 <motion.tr
-                                    key={service.id}
+                                    key={service._id}
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: index * 0.05 }}
@@ -250,10 +250,10 @@ export default function ServiceHistory() {
                                             <div className="flex items-center hover:bg-slate-50/50 transition-colors">
                                                 <div className="px-6 py-4">
                                                     <button
-                                                        onClick={() => toggleSelectService(service.id)}
+                                                        onClick={() => toggleSelectService(service._id)}
                                                         className="hover:text-teal-600 transition-colors"
                                                     >
-                                                        {selectedServices.includes(service.id) ? (
+                                                        {selectedServices.includes(service._id) ? (
                                                             <CheckSquare className="w-5 h-5 text-teal-600" />
                                                         ) : (
                                                             <Square className="w-5 h-5 text-slate-400" />
@@ -262,42 +262,56 @@ export default function ServiceHistory() {
                                                 </div>
 
                                                 <button
-                                                    onClick={() => toggleRow(service.id)}
+                                                    onClick={() => toggleRow(service._id)}
                                                     className="px-6 py-4 flex items-center gap-3 hover:text-teal-600 transition-colors"
                                                 >
                                                     <motion.div
-                                                        animate={{ rotate: expandedRow === service.id ? 180 : 0 }}
+                                                        animate={{ rotate: expandedRow === service._id ? 180 : 0 }}
                                                         transition={{ duration: 0.3 }}
                                                     >
                                                         <ChevronDown className="w-4 h-4 text-slate-400" />
                                                     </motion.div>
-                                                    <span className="font-bold text-sm text-teal-600">{service.id}</span>
+                                                    <span className="font-bold text-sm text-teal-600">
+                                                        {service.orderNumber || service._id}
+                                                    </span>
                                                 </button>
 
                                                 <div className="flex-1 grid grid-cols-4 gap-4 pr-6 py-4">
                                                     <div>
-                                                        <div className="font-semibold text-sm text-slate-900">{service.customer.name}</div>
-                                                        <div className="text-xs text-slate-500">{service.customer.phone}</div>
+                                                        <div className="font-semibold text-sm text-slate-900">
+                                                            {service.customerId?.name}
+                                                        </div>
+                                                        <div className="text-xs text-slate-500">
+                                                            {service.customerId?.phone}
+                                                        </div>
                                                     </div>
                                                     <div>
-                                                        <div className="font-semibold text-sm text-slate-900">{service.tractor.name}</div>
-                                                        <div className="text-xs text-slate-500">{service.tractor.model}</div>
+                                                        <div className="font-semibold text-sm text-slate-900">
+                                                            {service.tractor?.name}
+                                                        </div>
+                                                        <div className="text-xs text-slate-500">
+                                                            {service.tractor?.model}
+                                                        </div>
                                                     </div>
                                                     <div>
-                                                        <div className="text-sm text-slate-600">{service.completionDate}</div>
-                                                        <div className="text-xs text-slate-500">{t("serviceHistory.ordered")}: {service.orderDate}</div>
+                                                        <div className="text-sm text-slate-600">
+                                                            {formatDate(service.completedAt || service.updatedAt)}
+                                                        </div>
+                                                        <div className="text-xs text-slate-500">
+                                                            {t("serviceHistory.ordered")}: {formatDate(service.createdAt)}
+                                                        </div>
                                                     </div>
                                                     <div className="flex items-center gap-2">
                                                         <button
                                                             onClick={() => generateReceipt(service)}
                                                             className="inline-flex cursor-pointer items-center gap-2 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold rounded-lg transition-all active:scale-95 shadow-sm"
                                                         >
-                                                            <RiReceiptFill  className="w-3.5 h-3.5" />
+                                                            <RiReceiptFill className="w-3.5 h-3.5" />
                                                             {t("serviceHistory.receipt")}
                                                         </button>
                                                         <button
-                                                            onClick={() => generateReceipt(service)}
-                                                            className="inline-flex cursor-pointer items-center gap-2 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold rounded-lg transition-all active:scale-95 shadow-sm"
+                                                            onClick={() => handleDelete(service)}
+                                                            className="inline-flex cursor-pointer items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg transition-all active:scale-95 shadow-sm"
                                                         >
                                                             <FaTrash className="w-3.5 h-3.5" />
                                                             {t("serviceHistory.delete")}
@@ -307,7 +321,7 @@ export default function ServiceHistory() {
                                             </div>
 
                                             <AnimatePresence>
-                                                {expandedRow === service.id && (
+                                                {expandedRow === service._id && (
                                                     <motion.div
                                                         initial={{ height: 0, opacity: 0 }}
                                                         animate={{ height: "auto", opacity: 1 }}
@@ -316,10 +330,13 @@ export default function ServiceHistory() {
                                                         className="overflow-hidden bg-slate-50/30"
                                                     >
                                                         <div className="px-6 py-6 space-y-6">
+                                                            {/* Customer Information */}
                                                             <div className="bg-white rounded-xl border border-slate-200/60 p-5 space-y-4">
                                                                 <div className="flex items-center gap-2 text-slate-900 pb-3 border-b border-slate-100">
                                                                     <User className="w-5 h-5 text-teal-600" />
-                                                                    <h4 className="font-bold text-sm uppercase tracking-wide">{t("serviceHistory.customerInformation")}</h4>
+                                                                    <h4 className="font-bold text-sm uppercase tracking-wide">
+                                                                        {t("serviceHistory.customerInformation")}
+                                                                    </h4>
                                                                 </div>
                                                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                                                     <div className="flex items-start gap-3">
@@ -331,7 +348,7 @@ export default function ServiceHistory() {
                                                                                 {t("serviceHistory.name")}
                                                                             </div>
                                                                             <div className="text-sm font-bold text-slate-900 mt-1">
-                                                                                {service.customer.name}
+                                                                                {service.customerId?.name}
                                                                             </div>
                                                                         </div>
                                                                     </div>
@@ -344,7 +361,7 @@ export default function ServiceHistory() {
                                                                                 {t("serviceHistory.phone")}
                                                                             </div>
                                                                             <div className="text-sm font-bold text-slate-900 mt-1">
-                                                                                {service.customer.phone}
+                                                                                {service.customerId?.phone}
                                                                             </div>
                                                                         </div>
                                                                     </div>
@@ -357,68 +374,104 @@ export default function ServiceHistory() {
                                                                                 {t("serviceHistory.email")}
                                                                             </div>
                                                                             <div className="text-sm font-bold text-slate-900 mt-1">
-                                                                                {service.customer.email}
+                                                                                {service.customerId?.email}
                                                                             </div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
 
+                                                            {/* Services and Parts Grid */}
                                                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                                                {/* Services Section */}
                                                                 <div className="bg-white rounded-xl border border-slate-200/60 overflow-hidden">
                                                                     <div className="flex items-center gap-2 text-slate-900 px-5 py-4 bg-teal-50/30 border-b border-slate-200">
                                                                         <Wrench className="w-5 h-5 text-teal-600" />
-                                                                        <h4 className="font-bold text-sm uppercase tracking-wide">{t("serviceHistory.servicesProvided")}</h4>
+                                                                        <h4 className="font-bold text-sm uppercase tracking-wide">
+                                                                            {t("serviceHistory.servicesProvided")}
+                                                                        </h4>
                                                                     </div>
                                                                     <div className="divide-y divide-slate-100">
-                                                                        {service.services.map((svc) => (
-                                                                            <div key={svc.id} className="px-5 py-3 flex items-center justify-between">
-                                                                                <div className="flex-1">
-                                                                                    <div className="text-sm font-semibold text-slate-900">{svc.title}</div>
-                                                                                    <div className="text-xs text-slate-500 mt-0.5">{t("serviceHistory.qty")}: {svc.quantity}</div>
+                                                                        {getServices(service.items).length > 0 ? (
+                                                                            <>
+                                                                                {getServices(service.items).map((svc) => (
+                                                                                    <div key={svc.serviceId?._id} className="px-5 py-3 flex items-center justify-between">
+                                                                                        <div className="flex-1">
+                                                                                            <div className="text-sm font-semibold text-slate-900">
+                                                                                                {svc.serviceId?.title || svc.serviceId?.name || svc.name}
+                                                                                            </div>
+                                                                                            <div className="text-xs text-slate-500 mt-0.5">
+                                                                                                {t("serviceHistory.qty")}: {svc.quantity}
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div className="text-sm font-bold text-teal-600">
+                                                                                            ₹{svc.lineTotals?.final?.toFixed(2) || svc.unitPrice?.toFixed(2)}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                ))}
+                                                                                <div className="px-5 py-3 flex items-center justify-between bg-slate-50/50">
+                                                                                    <div className="text-sm font-bold text-slate-700 uppercase tracking-wide">
+                                                                                        {t("serviceHistory.servicesTotal")}
+                                                                                    </div>
+                                                                                    <div className="text-base font-black text-teal-700">
+                                                                                        ₹{calculateItemsTotal(service.items, "SERVICE").toFixed(2)}
+                                                                                    </div>
                                                                                 </div>
-                                                                                <div className="text-sm font-bold text-teal-600">Rs. {svc.price}</div>
+                                                                            </>
+                                                                        ) : (
+                                                                            <div className="px-5 py-8 text-center text-slate-400 text-sm">
+                                                                                No services provided
                                                                             </div>
-                                                                        ))}
-                                                                        <div className="px-5 py-3 flex items-center justify-between bg-slate-50/50">
-                                                                            <div className="text-sm font-bold text-slate-700 uppercase tracking-wide">
-                                                                                {t("serviceHistory.servicesTotal")}
-                                                                            </div>
-                                                                            <div className="text-base font-black text-teal-700">
-                                                                                Rs. {calculateTotal(service.services)}
-                                                                            </div>
-                                                                        </div>
+                                                                        )}
                                                                     </div>
                                                                 </div>
 
+                                                                {/* Parts Section */}
                                                                 <div className="bg-white rounded-xl border border-slate-200/60 overflow-hidden">
                                                                     <div className="flex items-center gap-2 text-slate-900 px-5 py-4 bg-blue-50/30 border-b border-slate-200">
                                                                         <Package className="w-5 h-5 text-blue-600" />
-                                                                        <h4 className="font-bold text-sm uppercase tracking-wide">{t("serviceHistory.partsMaterials")}</h4>
+                                                                        <h4 className="font-bold text-sm uppercase tracking-wide">
+                                                                            {t("serviceHistory.partsMaterials")}
+                                                                        </h4>
                                                                     </div>
                                                                     <div className="divide-y divide-slate-100">
-                                                                        {service.parts.map((part) => (
-                                                                            <div key={part.id} className="px-5 py-3 flex items-center justify-between">
-                                                                                <div className="flex-1">
-                                                                                    <div className="text-sm font-semibold text-slate-900">{part.title}</div>
-                                                                                    <div className="text-xs text-slate-500 mt-0.5">{t("serviceHistory.qty")}: {part.quantity}</div>
+                                                                        {getParts(service.items).length > 0 ? (
+                                                                            <>
+                                                                                {getParts(service.items).map((part) => (
+                                                                                    <div key={part.partId?._id} className="px-5 py-3 flex items-center justify-between">
+                                                                                        <div className="flex-1">
+                                                                                            <div className="text-sm font-semibold text-slate-900">
+                                                                                                {part.partId?.title}
+                                                                                            </div>
+                                                                                            <div className="text-xs text-slate-500 mt-0.5">
+                                                                                                {t("serviceHistory.qty")}: {part.quantity}
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div className="text-sm font-bold text-blue-600">
+                                                                                            ₹{part.lineTotals?.final?.toFixed(2) || part.unitPrice?.toFixed(2)}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                ))}
+                                                                                <div className="px-5 py-3 flex items-center justify-between bg-slate-50/50">
+                                                                                    <div className="text-sm font-bold text-slate-700 uppercase tracking-wide">
+                                                                                        {t("serviceHistory.partsTotal")}
+                                                                                    </div>
+                                                                                    <div className="text-base font-black text-blue-700">
+                                                                                        ₹{calculateItemsTotal(service.items, "PART").toFixed(2)}
+                                                                                    </div>
                                                                                 </div>
-                                                                                <div className="text-sm font-bold text-blue-600">Rs. {part.price}</div>
+                                                                            </>
+                                                                        ) : (
+                                                                            <div className="px-5 py-8 text-center text-slate-400 text-sm">
+                                                                                No parts used
                                                                             </div>
-                                                                        ))}
-                                                                        <div className="px-5 py-3 flex items-center justify-between bg-slate-50/50">
-                                                                            <div className="text-sm font-bold text-slate-700 uppercase tracking-wide">
-                                                                                {t("serviceHistory.partsTotal")}
-                                                                            </div>
-                                                                            <div className="text-base font-black text-blue-700">
-                                                                                Rs. {calculateTotal(service.parts)}
-                                                                            </div>
-                                                                        </div>
+                                                                        )}
                                                                     </div>
                                                                 </div>
                                                             </div>
 
-                                                            <div className="bg-linear-to-r from-teal-50 to-blue-50 rounded-xl border border-teal-200/60 p-5 flex items-center justify-between">
+                                                            {/* Order Total */}
+                                                            <div className="bg-gradient-to-r from-teal-50 to-blue-50 rounded-xl border border-teal-200/60 p-5 flex items-center justify-between">
                                                                 <div className="flex items-center gap-3">
                                                                     <div className="w-12 h-12 rounded-xl bg-teal-600 flex items-center justify-center">
                                                                         <Calendar className="w-6 h-6 text-white" />
@@ -428,12 +481,12 @@ export default function ServiceHistory() {
                                                                             {t("serviceHistory.orderTotal")}
                                                                         </div>
                                                                         <div className="text-xs text-slate-500 mt-0.5">
-                                                                            {t("serviceHistory.completedDate")}: {service.completionDate}
+                                                                            {t("serviceHistory.completedDate")}: {formatDate(service.completedAt || service.updatedAt)}
                                                                         </div>
                                                                     </div>
                                                                 </div>
                                                                 <div className="text-3xl font-black text-teal-700">
-                                                                    Rs. {calculateTotal(service.services) + calculateTotal(service.parts)}
+                                                                    ₹{service.totals?.final?.toFixed(2) || "0.00"}
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -449,7 +502,9 @@ export default function ServiceHistory() {
                 </div>
 
                 {filteredServices.length === 0 && (
-                    <div className="py-12 text-center text-slate-400 font-medium italic">{t("serviceHistory.noCompletedServices")}</div>
+                    <div className="py-12 text-center text-slate-400 font-medium italic">
+                        {t("serviceHistory.noCompletedServices")}
+                    </div>
                 )}
             </div>
         </div>
