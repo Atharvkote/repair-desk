@@ -621,6 +621,9 @@ export const getOrders = async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(100);
 
+      console.log(orders);
+
+
     res.status(200).json({
       success: true,
       data: orders,

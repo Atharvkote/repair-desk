@@ -14,7 +14,7 @@ import Login from './pages/auth/admin-login-page'
 import Register from './pages/auth/client-register-page'
 import Loader from './components/utils/loader'
 import ServiceForm from './components/admin/service-management/step-form'
-import AdminLayout from './components/layout/admin-layout'
+import AdminLayout from './components/layout/admin/admin-layout'
 import ActiveServices from './pages/active-services-page'
 import ServiceHistory from './pages/service-history-page'
 import ServiceCatalog from './pages/service-catalog-page'
@@ -22,6 +22,7 @@ import PartsCatalog from './pages/parts-catalog-page'
 import AdminManagement from './pages/teams-page'
 import SettingsPage from './pages/settings-page'
 import Overview from './pages/overview-page'
+import ServiceFormPage from './pages/create-service-page'
 
 // // Protected Route Component
 // const ProtectedRoute = ({ children }) => {
@@ -73,7 +74,7 @@ const AppRoutes = () => {
       {/* Root Route */}
       <Route exact path="/admin" element={<AdminLayout />}>
         <Route index element={<Overview />} />
-        <Route path='service' element={<ServiceForm />} />
+        <Route path='service' element={<ServiceFormPage />} />
         <Route path='service/list' element={<ActiveServices />} />
         <Route path='history' element={<ServiceHistory />} />
         <Route path='catalog/services' element={<ServiceCatalog />} />

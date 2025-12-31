@@ -20,18 +20,15 @@ import { Link, useLocation } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
 import { useState } from "react"
 import { PlusIcon } from "lucide-react"
-import { ActivitySquare } from "lucide-react"
 import { AppWindowMacIcon } from "lucide-react"
-
-import { GrServices } from "react-icons/gr";
-import { RiHistoryFill } from "react-icons/ri";
 import { SiBookstack } from "react-icons/si";
 import { IoBarChartSharp } from "react-icons/io5";
-import { FaHome } from "react-icons/fa";
-import { MdCreateNewFolder, MdFolderShared, MdMiscellaneousServices, MdOutlineMiscellaneousServices } from "react-icons/md";
-import { FaFolder } from "react-icons/fa";
-import { FaFolderOpen, FaUserClock } from "react-icons/fa6"
+import { FaChevronCircleRight, FaCloudDownloadAlt, FaExternalLinkSquareAlt, FaHome } from "react-icons/fa";
+import { MdFolderShared } from "react-icons/md";
+import { FaBoxArchive, FaCircleNodes, FaFolderOpen, FaInbox, FaLocationArrow, FaStaylinked, FaUserClock, } from "react-icons/fa6"
 import { useTranslation } from "react-i18next"
+import { BsFillCloudHaze2Fill } from "react-icons/bs";
+
 
 export default function Sidebar() {
   const { t } = useTranslation('sidebar')
@@ -56,7 +53,7 @@ export default function Sidebar() {
           id: "services",
           subItems: [
             { label: t("newService"), icon: PlusIcon, href: "/admin/service" },
-            { label: t("activeServices"), icon: MdFolderShared , href: "/admin/service/list" },
+            { label: t("activeServices"), icon: FaLocationArrow   , href: "/admin/service/list" },
           ],
         },
         { label: t("history"), icon: FaUserClock , href: "/admin/history" },
@@ -66,8 +63,8 @@ export default function Sidebar() {
           href: "#",
           id: "catalog",
           subItems: [
-            { label: t("serviceCatalog"), icon: BookOpen, href: "/admin/catalog/services" },
-            { label: t("partsCatalog"), icon: Package, href: "/admin/catalog/parts" },
+            { label: t("serviceCatalog"), icon: FaCircleNodes    , href: "/admin/catalog/services" },
+            { label: t("partsCatalog"), icon: FaInbox   , href: "/admin/catalog/parts" },
           ],
         },
         { label: t("reports"), icon: IoBarChartSharp, href: "/admin/reports" },

@@ -33,6 +33,10 @@ const Login = () => {
     }, 1500)
   }
 
+  if (isLoading) return (
+    <Loader />
+  )
+
   return (
     <div className="min-h-screen bg-white overflow-hidden">
       <div className="grid grid-cols-1 lg:grid-cols-2 h-screen">

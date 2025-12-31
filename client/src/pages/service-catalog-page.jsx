@@ -106,6 +106,7 @@ const ServiceCatalog = () => {
         <table className="w-full">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Sr. No.</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">{t("serviceCatalog.serviceName")}</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">{t("serviceCatalog.description")}</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">{t("serviceCatalog.price")}</th>
@@ -115,9 +116,10 @@ const ServiceCatalog = () => {
           </thead>
           <tbody className="divide-y divide-gray-200">
             {filteredServices?.length > 0 ? (
-              filteredServices?.map((service) => (
+              filteredServices?.map((service ,index) => (
                 <tr key={service.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 text-sm font-medium text-gray-900">{service.title}</td>
+                  <td className="px-6 py-4 text-sm font-medium text-gray-900">{index + 1}</td>
+                  <td className="px-6 py-4 text-sm font-medium text-gray-900">{service.title ? service.title : service.name}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">{service.description}</td>
                   <td className="px-6 py-4 text-sm font-semibold text-teal-600">₹{service.price}</td>
                   <td className="px-6 py-4">

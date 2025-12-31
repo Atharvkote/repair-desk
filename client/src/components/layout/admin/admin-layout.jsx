@@ -1,6 +1,6 @@
 "use client"
 
-import Sidebar from "@/components/layout/side-bar"
+import Sidebar from "./side-bar"
 import { Outlet } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
 

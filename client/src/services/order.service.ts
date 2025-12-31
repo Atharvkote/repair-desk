@@ -56,6 +56,15 @@ export const orderService = {
     const response = await api.get<Order>(`/orders/${orderId}`)
     return response.data
   },
+  getOrders: async (): Promise<Order[]> => {
+    const response = await api.get<Order[]>('/orders')
+    return response.data
+  },
+
+  getOngoingOrders: async (): Promise<Order[]> => {
+    const response = await api.get<Order[]>('/orders?status=ONGOING')
+    return response.data
+  },
 
   addServiceItem: async (data: AddItemRequest): Promise<Order> => {
     const response = await api.post<Order>(`/orders/${data.orderId}/items`, {
