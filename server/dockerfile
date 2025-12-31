@@ -1,20 +1,15 @@
-# Stage 1: Build
-FROM node:18 AS builder
+FROM node:20-alpine
+
+RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm install --production
+COPY server/package.json server/pnpm-lock.yaml ./
 
-COPY . .
+RUN pnpm install --frozen-lockfile --prod
 
-# Stage 2: Production image
-FROM node:18-slim
+COPY server ./
 
-WORKDIR /app
+EXPOSE 5000
 
-# Copy only the minimal production build from builder
-COPY --from=builder /app .
-
-EXPOSE 3001
-CMD ["npm", "start"]
+CMD ["pnpm", "start"]
