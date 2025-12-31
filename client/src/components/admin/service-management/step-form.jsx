@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState, useRef, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { motion, AnimatePresence } from "framer-motion"
@@ -21,12 +21,15 @@ import {
 import ToggleTabs from "@/components/customs/toggle-tabs"
 import { FaBoxArchive } from "react-icons/fa6"
 import { IoSettingsSharp } from "react-icons/io5"
-import { TRACTOR_SERVICE_CATALOG, PARTS_MATERIALS_CATALOG } from "@/lib/service-catalog"
-import { ClipboardList } from "lucide-react" // Import ClipboardList
+import { ClipboardList } from "lucide-react"
 import { useLocation } from "react-router-dom"
 import { GrServices } from "react-icons/gr"
 import { toast } from "sonner"
 import { useTranslation } from "react-i18next"
+import { useDebounce } from "@/hooks/useDebounce"
+import { customerService } from "@/services/customer.service"
+import { orderService } from "@/services/order.service"
+import { catalogService } from "@/services/catalog.service"
 
 export default function ServiceForm() {
   const { t } = useTranslation('pages')
@@ -40,17 +43,48 @@ export default function ServiceForm() {
   const [customTitle, setCustomTitle] = useState("")
   const [customPrice, setCustomPrice] = useState("")
   const [customDesc, setCustomDesc] = useState("")
+  const [customStock, setCustomStock] = useState("");
   const [headerDate, setHeaderDate] = useState("")
   const [activeTab, setActiveTab] = useState("Services")
   const [searchQuery, setSearchQuery] = useState("")
   const [discounts, setDiscounts] = useState({})
   const [currentStep, setCurrentStep] = useState(1)
+  const [draftOrderId, setDraftOrderId] = useState(null)
+  const [users, setUsers] = useState([])
+  const [catalogResults, setCatalogResults] = useState([])
+  const [isSearchingCustomers, setIsSearchingCustomers] = useState(false)
+  const [isSearchingCatalog, setIsSearchingCatalog] = useState(false)
+  const [isLoadingOrder, setIsLoadingOrder] = useState(false)
+  const [services, setServices] = useState([]);
+  const [parts, setParts] = useState([]);
+  const searchAbortControllerRef = useRef(null)
+  const catalogAbortControllerRef = useRef(null)
+
+
+  const fetchCatalog = async () => {
+    try {
+      const services_data = await catalogService.getServices();
+      console.log('Fetched services:', services_data);
+      setCatalogResults(services_data);
+      setServices(services_data);
+
+      const parts_data = await catalogService.getParts();
+      console.log('Fetched parts:', parts_data);
+      setParts(parts_data);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to fetch services')
+    }
+  }
 
   useEffect(() => {
     const now = new Date()
     const iso = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16)
     setHeaderDate(iso)
+    fetchCatalog();
   }, [])
+
+  const debouncedUserQuery = useDebounce(userQuery, 350)
+  const debouncedSearchQuery = useDebounce(searchQuery, 350)
 
   useEffect(() => {
     if (location.state?.editMode && location.state?.serviceData) {
@@ -64,6 +98,10 @@ export default function ServiceForm() {
 
       if (serviceData.tractor) {
         setTractor(serviceData.tractor)
+      }
+
+      if (serviceData.orderId) {
+        setDraftOrderId(serviceData.orderId)
       }
 
       const allSelections = []
@@ -100,83 +138,290 @@ export default function ServiceForm() {
         setSelections(allSelections)
       }
 
-      console.log("[v0] Form populated with", allSelections.length, "items")
+      if (serviceData.discounts) {
+        setDiscounts(serviceData.discounts)
+      }
+
+      console.log("Form populated with", allSelections.length, "items")
     }
   }, [location.state])
 
-  const [users, setUsers] = useState([
-    { id: "1", name: "John Doe", phone: "9876543210", email: "john@example.com" },
-    { id: "2", name: "Jane Smith", phone: "9123456789", email: "jane@example.com" },
-  ])
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      const fallbackCatalog = activeTab === "Services" ? services : parts
+      setCatalogResults(fallbackCatalog)
+    }
+  }, [activeTab, searchQuery])
 
-  const results = useMemo(() => {
-    const q = userQuery.trim().toLowerCase()
-    if (!q) return users
-    return users.filter((u) =>
-      [u.name, u.phone, u.email].filter(Boolean).some((v) => (v || "").toLowerCase().includes(q)),
-    )
-  }, [userQuery, users])
+  const results = useMemo(() => users, [users])
 
-  const catalogResults = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase()
-    const catalog = activeTab === "Services" ? TRACTOR_SERVICE_CATALOG : PARTS_MATERIALS_CATALOG
-    if (!q) return catalog
-    return catalog.filter((item) =>
-      [item.title, item.description].filter(Boolean).some((v) => (v || "").toLowerCase().includes(q)),
-    )
-  }, [searchQuery, activeTab])
+  useEffect(() => {
+    const searchCustomers = async () => {
+      if (!debouncedUserQuery.trim()) {
+        setUsers([])
+        return
+      }
 
-  const total = useMemo(() => selections.reduce((sum, s) => sum + s.item.price * s.quantity, 0), [selections])
+      if (searchAbortControllerRef.current) {
+        searchAbortControllerRef.current.abort()
+      }
+
+      searchAbortControllerRef.current = new AbortController()
+      setIsSearchingCustomers(true)
+
+      try {
+        const customers = await customerService.searchCustomers(debouncedUserQuery)
+        console.log('Customers:', customers)
+        setUsers(customers)
+      } catch (error) {
+        if (error.name !== 'AbortError' && error.name !== 'CanceledError') {
+          console.error('Customer search error:', error)
+          toast.error(error.response?.data?.message || 'Failed to search customers')
+        }
+      } finally {
+        setIsSearchingCustomers(false)
+      }
+    }
+
+    searchCustomers()
+
+    return () => {
+      if (searchAbortControllerRef.current) {
+        searchAbortControllerRef.current.abort()
+      }
+    }
+  }, [debouncedUserQuery])
+
+  useEffect(() => {
+    const searchCatalog = async () => {
+      if (!debouncedSearchQuery.trim()) {
+        const fallbackCatalog = activeTab === "Services" ? services : parts
+        setCatalogResults(fallbackCatalog)
+        return
+      }
+
+      if (catalogAbortControllerRef.current) {
+        catalogAbortControllerRef.current.abort()
+      }
+
+      catalogAbortControllerRef.current = new AbortController()
+      setIsSearchingCatalog(true)
+
+      try {
+        const items = activeTab === "Services"
+          ? await catalogService.searchServices(debouncedSearchQuery)
+          : await catalogService.searchParts(debouncedSearchQuery)
+        setCatalogResults(items)
+      } catch (error) {
+        if (error.name !== 'AbortError' && error.name !== 'CanceledError') {
+          console.error('Catalog search error:', error)
+          const fallbackCatalog = activeTab === "Services" ? services : parts
+          setCatalogResults(fallbackCatalog)
+        }
+      } finally {
+        setIsSearchingCatalog(false)
+      }
+    }
+
+    searchCatalog()
+
+    return () => {
+      if (catalogAbortControllerRef.current) {
+        catalogAbortControllerRef.current.abort()
+      }
+    }
+  }, [debouncedSearchQuery, activeTab])
+
+  const total = useMemo(() => {
+    return selections.reduce((sum, s) => sum + s.item.price * s.quantity, 0)
+  }, [selections])
+
   const totalDiscount = useMemo(() => {
     return selections.reduce((sum, s) => {
-      const itemDiscount = discounts[s.item.id] || 0
+      const itemDiscount = discounts[s.item._id] || 0
       return sum + (s.item.price * s.quantity * itemDiscount) / 100
     }, 0)
   }, [selections, discounts])
+
   const finalTotal = useMemo(() => total - totalDiscount, [total, totalDiscount])
 
-  const addSelection = (item) => {
+  const addSelection = useCallback(async (item) => {
+    if (!draftOrderId) {
+      toast.error('Please select a customer first')
+      return
+    }
+    let newItem = null
+    if (item.flag === "custom") {
+      try {
+        if (item.type === "service") {
+          newItem = await catalogService.createService({
+            name: item.title,
+            price: item.price,
+            description: item.description,
+            serviceCode: item.Code,
+            status: 'AVAILABLE'
+          })
+        } else {
+          newItem = await catalogService.createPart({
+            name: item.title,
+            stock: item.stock,
+            price: item.price,
+            description: item.description,
+            partCode: item.Code,
+            status: 'AVAILABLE'
+          })
+        }
+        fetchCatalog();
+        item = newItem.data;
+        console.log('New item created:', item)
+      } catch (error) {
+        toast.error(error.response?.data?.message || 'Failed to add item')
+      }
+    }
+
+    const existingSelection = selections.find((s) => s.item._id === item._id)
+    const newQuantity = existingSelection ? existingSelection.quantity + 1 : 1
+
     setSelections((prev) => {
-      const idx = prev.findIndex((p) => p.item.id === item.id)
+      const idx = prev.findIndex((p) => p.item._id === item._id)
       if (idx >= 0) {
         const next = [...prev]
-        next[idx] = { ...next[idx], quantity: next[idx].quantity + 1 }
+        next[idx] = { ...next[idx], quantity: newQuantity }
         return next
       }
       return [...prev, { item, quantity: 1 }]
     })
-  }
 
-  const decSelection = (id) => {
+    try {
+      const itemType = activeTab === "Services" ? 'service' : 'part'
+      const order = itemType === 'service'
+        ? await orderService.addServiceItem({
+          orderId: draftOrderId,
+          itemId: item._id,
+          quantity: newQuantity,
+          type: 'service',
+        })
+        : await orderService.addPartItem({
+          orderId: draftOrderId,
+          itemId: item._id,
+          quantity: newQuantity,
+          type: 'part',
+        })
+
+      if (order.items) {
+        const updatedSelections = order.items.map((orderItem) => {
+          const catalogItem = catalogResults.find((c) => c._id === orderItem.itemId) || item
+          return {
+            item: {
+              id: catalogItem.id,
+              title: catalogItem.title,
+              price: catalogItem.price,
+              description: catalogItem.description || "",
+            },
+            quantity: orderItem.quantity,
+          }
+        })
+        setSelections(updatedSelections)
+      }
+    } catch (error) {
+      setSelections((prev) => {
+        const idx = prev.findIndex((p) => p.item._id === item._id)
+        if (idx >= 0) {
+          const next = [...prev]
+          next[idx] = { ...next[idx], quantity: existingSelection ? existingSelection.quantity : 0 }
+          return next.filter((s) => s.quantity > 0)
+        }
+        return prev
+      })
+      toast.error(error.response?.data?.message || 'Failed to add item')
+    }
+  }, [draftOrderId, selections, activeTab, catalogResults])
+
+  const decSelection = useCallback(async (id) => {
+    if (!draftOrderId) return;
+
+    const existingSelection = selections.find((s) => s.item._id === id)
+    if (!existingSelection) return;
+
+    const newQuantity = existingSelection.quantity - 1
+
     setSelections((prev) => {
-      const idx = prev.findIndex((p) => p.item.id === id)
+      const idx = prev.findIndex((p) => p.item._id === id)
       if (idx < 0) return prev
       const next = [...prev]
-      const q = next[idx].quantity - 1
-      if (q <= 0) return next.filter((s) => s.item.id !== id)
-      next[idx] = { ...next[idx], quantity: q }
+      if (newQuantity <= 0) {
+        return next.filter((s) => s.item._id !== id)
+      }
+      next[idx] = { ...next[idx], quantity: newQuantity }
       return next
     })
-  }
 
-  const updateDiscount = (id, delta) => {
+    try {
+      if (newQuantity <= 0) {
+        await orderService.removeItem(draftOrderId, id)
+      } else {
+        await orderService.updateItemQuantity(draftOrderId, id, newQuantity)
+      }
+    } catch (error) {
+      setSelections((prev) => {
+        const idx = prev.findIndex((p) => p.item._id === id)
+        if (idx >= 0) {
+          const next = [...prev]
+          next[idx] = { ...next[idx], quantity: existingSelection.quantity }
+          return next
+        }
+        return prev
+      })
+      toast.error(error.response?.data?.message || 'Failed to update item')
+    }
+  }, [draftOrderId, selections])
+
+  const updateDiscount = useCallback(async (id, delta) => {
+    if (!draftOrderId) return
+
+    const newDiscount = (discounts[id] || 0) + delta
+    const finalDiscount = newDiscount < 0 ? 0 : newDiscount
+
     setDiscounts((prev) => {
-      const val = (prev[id] || 0) + delta
-      if (val < 0) {
+      if (finalDiscount === 0) {
         const { [id]: _, ...rest } = prev
         return rest
       }
-      return { ...prev, [id]: val }
+      return { ...prev, [id]: finalDiscount }
     })
-  }
+
+    try {
+      console.log("id : " , id);
+      console.log("finalDiscount : " , finalDiscount);
+
+      await orderService.updateItemDiscount({
+        orderId: draftOrderId,
+        itemId: id,
+        discountPercent: finalDiscount,
+      })
+    } catch (error) {
+      setDiscounts((prev) => {
+        const val = (prev[id] || 0) - delta
+        if (val < 0) {
+          const { [id]: _, ...rest } = prev
+          return rest
+        }
+        return { ...prev, [id]: val }
+      })
+      toast.error(error.response?.data?.message || 'Failed to update discount')
+    }
+  }, [draftOrderId, discounts])
 
   const addCustomService = () => {
     if (!customTitle.trim() || !customPrice.trim()) return
     const item = {
-      id: `custom-${Date.now()}`,
+      Code: `custom-${Date.now()}`,
       title: customTitle,
       price: Number.parseFloat(customPrice),
       description: customDesc,
+      stock: customStock,
+      type: activeTab === "Services" ? "service" : "part",
+      flag: "custom"
     }
     addSelection(item)
     setCustomTitle("")
@@ -184,24 +429,62 @@ export default function ServiceForm() {
     setCustomDesc("")
   }
 
-  const submitOrder = () => {
-    toast.success(`Order created for ${selectedUser?.name} with total: ₹${finalTotal.toFixed(2)}`)
+  const submitOrder = async () => {
+    if (!draftOrderId) {
+      toast.error('No draft order found')
+      return
+    }
+
+    try {
+      setIsLoadingOrder(true)
+      const order = await orderService.startService(draftOrderId)
+      toast.success(`Service started for ${selectedUser?.name}`)
+      resetForm()
+    } catch (error) {
+      const errorMessage = error.response?.message || 'Failed to complete order'
+      console.error("er", error)
+      toast.error(errorMessage)
+
+      if (error.response?.status === 409 || errorMessage.includes('status')) {
+        toast.info('Order status prevents this action')
+      }
+    } finally {
+      setIsLoadingOrder(false)
+    }
+  }
+
+
+
+  const resetForm = () => {
     setCurrentStep(1)
     setSelectedUser(null)
     setSelections([])
     setDiscounts({})
     setTractor({ name: "", model: "" })
+    setDraftOrderId(null)
+    setUserQuery("")
+    setSearchQuery("")
+    setUsers([])
+    setCatalogResults([])
   }
 
-  const handleNext = () => {
-    console.log(
-      "[v0] handleNext triggered. currentStep:",
-      currentStep,
-      "selectedUser:",
-      !!selectedUser,
-      "selections:",
-      selections.length,
-    )
+  const handleNext = async () => {
+    if (currentStep === 1 && selectedUser && !draftOrderId) {
+      try {
+        const order = await orderService.createDraftOrder({
+          customerId: selectedUser._id,
+          tractor: tractor.name || tractor.model ? {
+            name: tractor.name || undefined,
+            model: tractor.model || undefined,
+          } : undefined,
+        })
+        console.log('Draft order created:', order)
+        setDraftOrderId(order.data.id)
+      } catch (error) {
+        toast.error(error.response?.data?.message || 'Failed to create draft order')
+        return
+      }
+    }
     if (currentStep < 4) setCurrentStep(currentStep + 1)
   }
 
@@ -299,40 +582,61 @@ export default function ServiceForm() {
                       onChange={(e) => setUserQuery(e.target.value)}
                       placeholder={t("stepForm.searchPlaceholder")}
                       className="pl-12 bg-slate-50/50 border-slate-200 h-12 rounded-xl focus:bg-white focus:ring-2 focus:ring-teal-500/20 transition-all text-[15px]"
+                    // disabled={isSearchingCustomers}
                     />
                   </div>
                 </div>
 
                 <div className="max-h-[280px] overflow-y-auto rounded-2xl border border-slate-100 bg-slate-50/30 divide-y divide-slate-100/80 custom-scrollbar">
-                  {results.length === 0 ? (
+                  {isSearchingCustomers ? (
                     <div className="p-8 text-center text-slate-400 font-medium italic">
-                      {t("stepForm.noMatchingCustomers")}
+                      Searching...
+                    </div>
+                  ) : results.length === 0 ? (
+                    <div className="p-8 text-center text-slate-400 font-medium italic">
+                      {userQuery.trim() ? t("stepForm.noMatchingCustomers") : "Search customers using name , phone or email"}
                     </div>
                   ) : (
                     results.map((u) => (
                       <button
-                        key={u.id}
-                        onClick={() => setSelectedUser(u)}
+                        key={u?._id}
+                        onClick={async () => {
+                          setSelectedUser(u)
+                          try {
+                            const order = await orderService.createDraftOrder({
+                              customerId: u?._id,
+                              tractor: tractor.name || tractor.model ? {
+                                name: tractor.name || undefined,
+                                model: tractor.model || undefined,
+                              } : undefined,
+                            })
+                            setDraftOrderId(order.id)
+                            toast.success('Draft order created')
+                          } catch (error) {
+                            toast.error(error.response?.message || 'Failed to create draft order')
+                            setSelectedUser(null)
+                          }
+                        }}
                         className={`w-full text-left px-6 py-4 transition-all duration-200 flex items-center justify-between group
-                          ${selectedUser?.id === u.id ? "bg-teal-50/80" : "hover:bg-white"}`}
+                          ${selectedUser?._id === u?._id ? "bg-teal-50/80" : "hover:bg-white"}`}
                       >
                         <div className="flex items-center gap-4">
                           <div
                             className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shadow-sm
-                            ${selectedUser?.id === u.id ? "bg-teal-600 text-white" : "bg-slate-200 text-slate-600"}`}
+                            ${selectedUser?._id === u?._id ? "bg-teal-600 text-white" : "bg-slate-200 text-slate-600"}`}
                           >
-                            {u.name.charAt(0)}
+                            {u?.name?.charAt(0)}
                           </div>
                           <div>
                             <div
-                              className={`font-bold text-[15px] ${selectedUser?.id === u.id ? "text-teal-900" : "text-slate-900"}`}
+                              className={`font-bold text-[15px] ${selectedUser?.id === u._id ? "text-teal-900" : "text-slate-900"}`}
                             >
-                              {u.name}
+                              {u?.name}
                             </div>
-                            <div className="text-[13px] text-slate-500 mt-0.5">{u.phone || u.email}</div>
+                            <div className="text-[13px] text-slate-500 mt-0.5">{u?.phone || u?.email}</div>
                           </div>
                         </div>
-                        {selectedUser?.id === u.id && (
+                        {selectedUser?._id === u?._id && (
                           <div className="w-6 h-6 bg-teal-600 rounded-full flex items-center justify-center shadow-md shadow-teal-500/20">
                             <Check className="w-3.5 h-3.5 text-white" />
                           </div>
@@ -370,12 +674,26 @@ export default function ServiceForm() {
                   <Button
                     variant="outline"
                     className="border-teal-100 bg-teal-50/30 text-teal-700 hover:bg-teal-600 hover:text-white rounded-xl h-11 transition-all duration-300 font-semibold"
-                    onClick={() => {
-                      if (!newUser.name?.trim()) return
-                      const created = { id: Date.now().toString(), ...newUser }
-                      setUsers([...users, created])
-                      setSelectedUser(created)
-                      setNewUser({ name: "", phone: "", email: "" })
+                    onClick={async () => {
+                      if (!newUser.name?.trim()) {
+                        toast.error('Please enter customer name')
+                        return
+                      }
+                      try {
+                        const created = await customerService.upsertCustomer({
+                          name: newUser.name.trim(),
+                          phone: newUser.phone?.trim() || undefined,
+                          email: newUser.email?.trim() || undefined,
+                        })
+                        console.log('Customer created:', created)
+                        setUsers([created])
+                        setSelectedUser(created.data)
+                        setNewUser({ name: "", phone: "", email: "" })
+                        setUserQuery(created.data.name)
+                        toast.success('Customer created successfully')
+                      } catch (error) {
+                        toast.error(error.response?.data?.message || 'Failed to create customer')
+                      }
                     }}
                   >
                     <Plus className="w-4 h-4 mr-2" />
@@ -456,6 +774,15 @@ export default function ServiceForm() {
                       placeholder={t("stepForm.description")}
                       className="md:col-span-2 h-11 rounded-xl bg-white border-teal-100/50"
                     />
+                    {activeTab !== "Services" && (
+                      <Input
+                        type="number"
+                        value={customStock}
+                        onChange={(e) => setCustomStock(e.target.value)}
+                        placeholder={'Add Stock'}
+                        className="md:col-span-2 h-11 rounded-xl bg-white border-teal-100/50"
+                      />
+                    )}
                   </div>
                   <Button
                     className="bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-xl px-6 h-11 shadow-lg shadow-teal-500/20 transition-all active:scale-95"
@@ -473,16 +800,17 @@ export default function ServiceForm() {
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder={`Find ${activeTab === "Services" ? "services" : "spare parts"} in catalog...`}
                       className="pl-12 bg-slate-50/50 border-slate-200 h-12 rounded-xl focus:bg-white transition-all"
+                      disabled={isSearchingCatalog}
                     />
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 custom-scrollbar p-2 pr-1">
                     {catalogResults.map((item) => {
-                      const selected = selections.find((s) => s.item.id === item.id)
+                      const selected = selections.find((s) => s.item._id === item._id)
                       return (
                         <motion.div
                           layout
-                          key={item.id}
+                          key={item._id}
                           whileHover={{ y: -4 }}
                           className={`group p-5 rounded-2xl border transition-all duration-300 relative 
                             ${selected
@@ -507,7 +835,7 @@ export default function ServiceForm() {
                                   size="sm"
                                   className={`rounded-lg h-8 text-[11px] font-bold uppercase tracking-wider
                                     ${selected ? "bg-teal-600" : "border-slate-200 text-white hover:bg-teal-600 hover:text-white cursor-pointer"}`}
-                                  onClick={() => (selected ? decSelection(item.id) : addSelection(item))}
+                                  onClick={() => (selected ? decSelection(item._id) : addSelection(item))}
                                 >
                                   {selected ? <Check className="w-3 h-3 mr-1" /> : <Plus className="w-3 h-3 mr-1" />}
                                   {selected ? "Added" : "Add"}
@@ -516,7 +844,7 @@ export default function ServiceForm() {
                                 <div className="flex items-center bg-slate-100 rounded-lg p-0.5 border border-slate-200/50">
                                   <button
                                     className="p-1 text-slate-500 hover:bg-white rounded-md transition-colors"
-                                    onClick={() => decSelection(item.id)}
+                                    onClick={() => decSelection(item._id)}
                                   >
                                     <Minus className="w-3 h-3" />
                                   </button>
@@ -566,11 +894,11 @@ export default function ServiceForm() {
                   <div className="space-y-4">
                     {selections.map((s) => {
                       const itemTotal = s.item.price * s.quantity
-                      const itemDiscount = discounts[s.item.id] || 0
+                      const itemDiscount = discounts[s.item._id] || 0
                       const itemDiscountAmount = (itemTotal * itemDiscount) / 100
                       return (
                         <div
-                          key={s.item.id}
+                          key={s.item._id}
                           className="rounded-lg border border-slate-200 p-5 bg-white hover:shadow-md transition-all duration-200"
                         >
                           <div className="flex items-center justify-between mb-4">
@@ -589,7 +917,7 @@ export default function ServiceForm() {
                                 size="sm"
                                 variant="outline"
                                 className="h-9 px-3 text-slate-700 bg-white border-slate-300 hover:bg-slate-100 transition-all duration-200"
-                                onClick={() => updateDiscount(s.item.id, -5)}
+                                onClick={() => updateDiscount(s.item._id, -5)}
                               >
                                 <Minus className="w-4 h-4 mr-1" />
                                 5%
@@ -600,7 +928,7 @@ export default function ServiceForm() {
                               <Button
                                 size="sm"
                                 className="h-9 px-3 bg-teal-600 hover:bg-teal-700 transition-all duration-200"
-                                onClick={() => updateDiscount(s.item.id, 5)}
+                                onClick={() => updateDiscount(s.item._id, 5)}
                               >
                                 <Plus className="w-4 h-4 mr-1" />
                                 5%
@@ -759,7 +1087,7 @@ export default function ServiceForm() {
                 ${"border-white text-white hover:text-teal-600 hover:bg-white duration-300 transition-colors cursor-pointer  "}
                  disabled:cursor-not-allowed`}
               onClick={currentStep === 4 ? submitOrder : handleNext}
-              disabled={(currentStep === 1 && !selectedUser) || (currentStep === 2 && selections.length === 0)}
+              disabled={(currentStep === 1 && !selectedUser) || (currentStep === 2 && selections.length === 0) || isLoadingOrder}
             >
               {currentStep === 4 ? (
                 <>

@@ -13,35 +13,14 @@ import { IoExtensionPuzzleSharp } from "react-icons/io5";
 import { MdEdit } from "react-icons/md"
 import { FaEye, FaTrash } from "react-icons/fa6"
 import { useTranslation } from "react-i18next"
+import { catalogService } from "@/services/catalog.service"
+import { toast } from "sonner"
+import { useEffect } from "react"
+import { useMemo } from "react"
 
 const PartsCatalog = () => {
     const { t } = useTranslation('pages')
-    const [parts, setParts] = useState([
-        {
-            id: "1",
-            name: "Engine Oil 5L",
-            description: "Premium synthetic engine oil",
-            price: 800,
-            stock: 25,
-            status: "in-stock",
-        },
-        {
-            id: "2",
-            name: "Air Filter",
-            description: "High-efficiency air filter",
-            price: 250,
-            stock: 40,
-            status: "in-stock",
-        },
-        {
-            id: "3",
-            name: "Spark Plugs Set",
-            description: "Set of 4 spark plugs",
-            price: 600,
-            stock: 15,
-            status: "low-stock",
-        },
-    ])
+    const [parts, setParts] = useState()
 
     const [searchQuery, setSearchQuery] = useState("")
     const [selectedPart, setSelectedPart] = useState(null)
@@ -50,11 +29,27 @@ const PartsCatalog = () => {
     const [createSidebarOpen, setCreateSidebarOpen] = useState(false)
     const [editingPart, setEditingPart] = useState(null)
 
-    const filteredParts = parts.filter(
-        (p) =>
-            p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            p.description.toLowerCase().includes(searchQuery.toLowerCase()),
-    )
+
+    const fetchCatalog = async () => {
+        try {
+            const parts_data = await catalogService.getParts();
+            setParts(parts_data);
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Failed to fetch services')
+        }
+    }
+
+    useEffect(() => {
+        fetchCatalog()
+    }, [])
+
+    const filteredParts = useMemo(() => {
+        return parts?.filter((s) => {
+            const nameMatch = s.name?.toLowerCase().includes(searchQuery.toLowerCase())
+            const descMatch = s.description?.toLowerCase().includes(searchQuery.toLowerCase())
+            return nameMatch || descMatch
+        })
+    }, [parts, searchQuery])
 
     const handleView = (part) => {
         setSelectedPart(part)
@@ -110,11 +105,11 @@ const PartsCatalog = () => {
 
             {/* Parts Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredParts.map((part) => (
-                    <Card key={part.id} className="p-5 hover:shadow-lg transition-shadow">
+                {filteredParts?.map((part) => (
+                    <Card key={part._id} className="p-5 hover:shadow-lg transition-shadow">
                         <div className="space-y-4">
                             <div>
-                                <h3 className="text-lg font-semibold text-foreground">{part.name}</h3>
+                                <h3 className="text-lg font-semibold text-foreground">{part.title}</h3>
                                 <p className="text-sm text-muted-foreground mt-1">{part.description}</p>
                             </div>
 

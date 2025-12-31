@@ -26,7 +26,7 @@ export function PartsDetailSidebar({ part, open, onClose }) {
                 <Package className="h-5 w-5" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold">{part.name}</h2>
+                <h2 className="text-lg font-semibold">{part.title}</h2>
                 <p className="text-primary-foreground/80 text-xs">Part Details</p>
               </div>
             </div>

@@ -40,9 +40,12 @@ import { socketioLogger, redisLogger } from "./utils/logger.js";
 // Database configs
 import { connectDB, disconnectDB } from "./configs/mongodb.config.js";
 
-
 // Connect MongoDB
 await connectDB();
+
+// Routers
+import adminAuthRouter from "./routers/admin-auth.routes.js";
+import userAuthRouter from "./routers/user-auth.routes.js";
 
 const app = express();
 const SERVER_PORT = process.env.SERVER_PORT;
@@ -111,23 +114,18 @@ app.use(
   })
 );
 
-// CORS
-// Only allow specific origins when credentials are required. Do NOT use "*" when
-// `credentials: true` because browsers will reject responses that set
-// Access-Control-Allow-Origin: * together with Access-Control-Allow-Credentials: true.
+
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:9090",
-  // Add your allowed production origins here
   // "https://your-production-domain.com",
 ];
+
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps, curl, or same-origin requests)
       if (!origin) return callback(null, true);
       if (allowedOrigins.includes(origin)) {
-        // `true` signals the cors middleware to reflect the request origin
         return callback(null, true);
       }
       return callback(new Error("Not allowed by CORS"));
@@ -247,9 +245,20 @@ app.get("/health", (req, res) => {
   });
 });
 
-// Attach your routers here (examples commented)
-// app.use("/api/v1/auth", authRouter);
-// app.use("/api/v1", apiRouter);
+
+app.use("/api/v1/admin-auth", adminAuthRouter);
+app.use("/api/v1/auth", userAuthRouter);
+
+// Import and use new routes
+import customerRouter from "./routers/customer.routes.js";
+import serviceRouter from "./routers/service.routes.js";
+import partRouter from "./routers/part.routes.js";
+import serviceOrderRouter from "./routers/service-order.routes.js";
+
+app.use("/api/customers", customerRouter);
+app.use("/api/services", serviceRouter);
+app.use("/api/parts", partRouter);
+app.use("/api/orders", serviceOrderRouter);
 
 // If you want to restrict certain sensitive endpoints with the limiter:
 // app.use("/api/v1/sensitive", sensitiveEndpointsLimiter, sensitiveRouter);
@@ -321,9 +330,12 @@ export const io = new Server(server, {
   allowUpgrades: true,
 });
 
-// Initialize your socket event handlers here (placeholder)
-// import { initializeMyHandlers } from "./socket-handlers/my-handler.js";
-// initializeMyHandlers(io);
+// Initialize socket event handlers
+import { initializeOrderHandlers } from "./socket-handlers/order-handler.js";
+import { setIOInstance } from "./controllers/service-order.controller.js";
+
+initializeOrderHandlers(io);
+setIOInstance(io);
 
 // --------------------- SERVER ---------------------
 server.listen(SERVER_PORT, () => {
