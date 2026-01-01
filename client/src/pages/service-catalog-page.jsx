@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { MdEdit, MdOutlineMiscellaneousServices } from "react-icons/md"
-import { FaEye, FaTrash } from "react-icons/fa6"
+import { FaCircleNodes, FaEye, FaTrash } from "react-icons/fa6"
 import ServiceDetailSidebar from "@/components/admin/catalogs/service-detail-sidebar"
 import ServiceEditSidebar from "@/components/admin/catalogs/service-edit-sidebar"
 import ServiceCreateSidebar from "@/components/admin/catalogs/service-create-sidebar"
@@ -14,6 +14,8 @@ import { catalogService } from "@/services/catalog.service"
 import { toast } from "sonner"
 import { Search } from "lucide-react"
 import { Plus } from "lucide-react"
+import Loader from "@/components/shared/loader"
+import Header from "@/components/shared/sytle-header"
 
 const ServiceCatalog = () => {
   const { t } = useTranslation("pages")
@@ -27,6 +29,8 @@ const ServiceCatalog = () => {
   const [editSidebarOpen, setEditSidebarOpen] = useState(false)
   const [createSidebarOpen, setCreateSidebarOpen] = useState(false)
 
+  const [loading, setLoading] = useState(false);
+
   // Fetch services
   const fetchCatalog = async () => {
     try {
@@ -34,10 +38,12 @@ const ServiceCatalog = () => {
       setServices(data)
     } catch (error) {
       toast.error(error?.response?.data?.message || "Failed to fetch services")
+    } finally {
+      setLoading(false);
     }
   }
-
   useEffect(() => {
+    setLoading(true);
     fetchCatalog()
   }, [])
 
@@ -75,12 +81,20 @@ const ServiceCatalog = () => {
     setCreateSidebarOpen(false)
   }
 
+  if (loading) {
+    return (
+      <div className="max-w-6xl px-5 space-y-6">
+        <Loader />
+        </div>
+    )
+  }
+
   return (
     <div className="max-w-6xl px-5 space-y-6">
       <div className="bg-white p-6 rounded-xl border border-border shadow-sm space-y-5">
 
         <div className="space-y-2">
-          <h1 className="text-2xl font-bold text-teal-600 flex items-center gap-2"><MdOutlineMiscellaneousServices className="w-8 h-8" /> {t("serviceCatalog.title")}</h1>
+          <h1 className="text-2xl font-bold text-teal-600 flex items-center gap-2"><FaCircleNodes className="w-9 h-9" /> <Header title={t("serviceCatalog.title")}/></h1>
           <p className="text-muted-foreground">{t("serviceCatalog.description")}</p>
         </div>
 
@@ -116,7 +130,7 @@ const ServiceCatalog = () => {
           </thead>
           <tbody className="divide-y divide-gray-200">
             {filteredServices?.length > 0 ? (
-              filteredServices?.map((service ,index) => (
+              filteredServices?.map((service, index) => (
                 <tr key={service.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">{index + 1}</td>
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">{service.title ? service.title : service.name}</td>

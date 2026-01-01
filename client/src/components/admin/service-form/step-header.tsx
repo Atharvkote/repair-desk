@@ -6,6 +6,7 @@ import { motion } from "framer-motion"
 import { Check } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { GrServices } from "react-icons/gr"
+import Header from "@/components/shared/sytle-header"
 
 interface Step {
   id: number
@@ -23,8 +24,8 @@ export default function StepHeader({ currentStep, steps }: StepHeaderProps) {
 
   return (
     <div className="bg-white rounded-3xl border border-slate-200/60 p-6 md:p-8 shadow-sm mb-8">
-      <h1 className="text-2xl font-bold text-teal-600 flex items-center gap-2">
-        <GrServices /> {t("stepForm.title")}
+      <h1 className="text-2xl font-bold text-teal-600 flex items-center gap-2 mb-2">
+        <GrServices className="w-9 h-9" /> <Header title={t("stepForm.title")}  />
       </h1>
       <p className="text-foreground font-medium mb-3"> {t("stepForm.description")} </p>
       <div className="relative flex justify-between items-start max-w-3xl mx-auto">

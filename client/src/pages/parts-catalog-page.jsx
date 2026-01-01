@@ -11,12 +11,13 @@ import PartsEditSidebar from "@/components/admin/catalogs//parts-edit-sidebar"
 import PartsCreateSidebar from "@/components/admin/catalogs/parts-create-sidebar"
 import { IoExtensionPuzzleSharp } from "react-icons/io5";
 import { MdEdit } from "react-icons/md"
-import { FaEye, FaTrash } from "react-icons/fa6"
+import { FaEye, FaScrewdriverWrench, FaTrash } from "react-icons/fa6"
 import { useTranslation } from "react-i18next"
 import { catalogService } from "@/services/catalog.service"
 import { toast } from "sonner"
 import { useEffect } from "react"
 import { useMemo } from "react"
+import Header from "@/components/shared/sytle-header"
 
 const PartsCatalog = () => {
     const { t } = useTranslation('pages')
@@ -83,8 +84,8 @@ const PartsCatalog = () => {
             <div className="bg-white p-6 rounded-xl border border-border shadow-sm space-y-5">
 
                 <div className="space-y-2 ">
-                    <h1 className="text-2xl font-bold text-teal-600 flex items-center gap-2"><IoExtensionPuzzleSharp className="w-8 h-8" /> {t("partsCatalog.title")}</h1>
-                    <p className="text-muted-foreground">{t("partsCatalog.description")}</p>
+                    <h1 className="text-2xl font-bold text-teal-600 flex items-center gap-2"><FaScrewdriverWrench  className="w-7 h-7" /><Header title={t("partsCatalog.title")} /></h1>
+                    <p className="text-muted-foreground"> {t("partsCatalog.description")}</p>
                 </div>
 
                 {/* Actions */}

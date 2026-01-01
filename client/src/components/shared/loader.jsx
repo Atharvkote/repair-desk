@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Shield, Zap } from "lucide-react"
+import { t } from "i18next"
 
 export default function Loader() {
     const [mounted, setMounted] = useState(false)
@@ -34,7 +35,7 @@ export default function Loader() {
     const currentTip = loadingTips[Math.min(Math.floor(progress / 20), loadingTips.length - 1)]
 
     return (
-        <div className="min-h-screen flex flex-col justify-center bg-gradient-to-br from-white to-teal-50">
+        <div className="min-h-screen flex rounded-xl flex-col justify-center bg-gradient-to-br from-white to-teal-50">
             <div
                 className={`w-full flex items-center justify-center p-4 sm:p-4 lg:p-8 xl:p-10 transition-all duration-1000 relative min-h-[50vh] lg:min-h-screen ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
                     }`}
@@ -69,7 +70,9 @@ export default function Loader() {
 
                         {/* Loader Content */}
                         <div className="flex-1 text-center lg:text-left">
-                            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-2">Management System</h1>
+                            <h1 className="text-3xl  sm:text-4xl lg:text-7xl  font-bold font-bbh-bogle  text-primary">
+                                {t("overview.repairDesk")} <span className="text-white p-1 rounded-lg mr-2 bg-primary">Desk</span>
+                            </h1>
                             <div className="h-1 w-12 bg-gradient-to-r from-teal-600 to-teal-400 rounded-full mb-4" />
 
                             <div className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-teal-600 to-teal-500 bg-clip-text text-transparent mb-6">

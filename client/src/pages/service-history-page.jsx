@@ -10,6 +10,10 @@ import { RiReceiptFill } from "react-icons/ri"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { orderService } from "@/services/order.service"
+import Loader from "@/components/shared/loader"
+import Header from "@/components/shared/sytle-header"
+import { BsAlarmFill } from "react-icons/bs"
+import { Button } from "@/components/ui/button"
 
 export default function ServiceHistory() {
     const { t } = useTranslation('pages')
@@ -17,8 +21,10 @@ export default function ServiceHistory() {
     const [expandedRow, setExpandedRow] = useState(null)
     const [selectedServices, setSelectedServices] = useState([])
     const [services, setServices] = useState([])
-    const [loading, setLoading] = useState(true)
 
+    const [loading, setLoading] = useState(true)
+    const [exporter, setExporter] = useState(false);
+    
     useEffect(() => {
         fetchServices()
     }, [])
@@ -68,7 +74,7 @@ export default function ServiceHistory() {
     }
 
     const toggleSelectService = (id) => {
-        setSelectedServices((prev) => 
+        setSelectedServices((prev) =>
             prev.includes(id) ? prev.filter((sid) => sid !== id) : [...prev, id]
         )
     }
@@ -118,38 +124,35 @@ export default function ServiceHistory() {
     const formatDate = (dateString) => {
         if (!dateString) return "N/A"
         const date = new Date(dateString)
-        return date.toLocaleDateString('en-IN', { 
-            year: 'numeric', 
-            month: 'short', 
-            day: 'numeric' 
+        return date.toLocaleDateString('en-IN', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
         })
     }
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-[400px]">
-                <div className="text-center">
-                    <div className="w-16 h-16 border-4 border-teal-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-                    <p className="mt-4 text-slate-600">Loading service history...</p>
-                </div>
-            </div>
+            <Loader />
         )
     }
-
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
             <div className="flex flex-col gap-4">
-                <div className="bg-white px-4 py-8 rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="bg-white px-4 py-8 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
-                        <h1 className="text-2xl font-bold flex text-teal-600 items-center gap-2">
-                            <FaClock className="w-7 h-7 text-teal-600" />
-                            {t("serviceHistory.title")}
+                        <h1 className="text-2xl font-bold flex text-teal-600 items-center gap-2 mb-2">
+                            <BsAlarmFill className="w-7 h-7 text-teal-600" />
+                            <Header title={t("serviceHistory.title")} />
                         </h1>
                         <p className="text-sm text-slate-500 mt-1">{t("serviceHistory.description")}</p>
                     </div>
+                    <div>
+                        <Button onClick={()=>{setExporter(!exporter)}} className={'cursor-pointer font-semibold rounded-lg hover:scale-105 transition-transform duration-500'}>Export Data</Button>
+                    </div>
                 </div>
 
-                <div className="mx-3 p-4 bg-white rounded-xl border border-slate-200 shadow-sm">
+                {exporter &&<div className=" p-4 bg-white rounded-xl border border-slate-200 shadow-sm">
                     {/* Header */}
                     <div className="flex items-center gap-2 text-xl font-semibold text-teal-600 mb-4">
                         <FaShareSquare className="w-5 h-5" />
@@ -202,7 +205,7 @@ export default function ServiceHistory() {
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>}
             </div>
 
             <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">

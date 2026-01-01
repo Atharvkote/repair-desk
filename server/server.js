@@ -48,7 +48,7 @@ import adminAuthRouter from "./routers/admin-auth.routes.js";
 import userAuthRouter from "./routers/user-auth.routes.js";
 
 const app = express();
-const SERVER_PORT = process.env.SERVER_PORT;
+const SERVER_PORT = process.env.SERVER_PORT || 5000;
 const server = http.createServer(app);
 
 server.keepAliveTimeout = 65000;
@@ -108,39 +108,35 @@ app.use(express.json());
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-// app.use(
-//   helmet({
-//     crossOriginResourcePolicy: { policy: "cross-origin" },
-//   })
-// );
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  })
+);
 
-// const allowedOrigins = [
-//   "http://localhost:5173",
-//   "http://localhost:9090",
-//   "https://repair-desk-production.up.railway.app/",
-//   "https://repair-desk.vercel.app",
-//   "http://192.168.67.1:5173/",
-// ];
+const allowedOrigins = [
+  // Local
+  "http://localhost:5173",
+  "http://localhost:9090",
 
-// app.use(
-//   cors({
-//     origin: function (origin, callback) {
-//       if (!origin) return callback(null, true);
-//       if (allowedOrigins.includes(origin)) {
-//         return callback(null, true);
-//       }
-//       return callback(new Error("Not allowed by CORS"));
-//     },
-//     credentials: true,
-//     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-//   })
-// );
+  // Production
+  "https://repair-desk.vercel.app",
+];
 
 app.use(
   cors({
-    origin: "*",
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   })
 );
+
 
 // Rate limiters (only if Redis is available)
 let rateLimiter = null;

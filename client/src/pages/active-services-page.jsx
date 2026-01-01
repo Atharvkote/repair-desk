@@ -9,6 +9,8 @@ import { MdEdit } from "react-icons/md"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { orderService } from "@/services/order.service"
+import Loader from "@/components/shared/loader"
+import Header from "@/components/shared/sytle-header"
 
 const STATUS_COLORS = {
   "ONGOING": "bg-teal-50 text-teal-700 border-teal-200",
@@ -107,10 +109,10 @@ export default function ActiveServices() {
   const formatDate = (dateString) => {
     if (!dateString) return "N/A"
     const date = new Date(dateString)
-    return date.toLocaleDateString('en-IN', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
+    return date.toLocaleDateString('en-IN', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
     })
   }
 
@@ -126,22 +128,17 @@ export default function ActiveServices() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-teal-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-slate-600">Loading services...</p>
-        </div>
-      </div>
+      <Loader />
     )
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500 max-w-6xl mx-auto">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm">
+    <div className="space-y-6  animate-in fade-in duration-500 max-w-6xl mx-auto">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-xl border border-slate-200/60 shadow-sm">
         <div>
           <h1 className="text-2xl font-bold text-teal-600 tracking-tight flex items-center gap-2">
             <FaFolderOpen className="w-5 h-5 text-teal-600" />
-            {t("activeServices.title")}
+            <Header title={t("activeServices.title")} />
           </h1>
           <p className="text-sm text-slate-500 mt-1">{t("activeServices.description")}</p>
         </div>
@@ -229,9 +226,8 @@ export default function ActiveServices() {
                           </div>
                           <div>
                             <span
-                              className={`inline-flex px-3 py-1 rounded-lg text-xs font-bold border ${
-                                STATUS_COLORS[service.status] || STATUS_COLORS["ONGOING"]
-                              }`}
+                              className={`inline-flex px-3 py-1 rounded-lg text-xs font-bold border ${STATUS_COLORS[service.status] || STATUS_COLORS["ONGOING"]
+                                }`}
                             >
                               {getStatusDisplay(service.status)}
                             </span>
@@ -340,11 +336,10 @@ export default function ActiveServices() {
                                                   {t("activeServices.qty")}: {svc.quantity}
                                                 </span>
                                                 {svc.serviceId?.status && (
-                                                  <span className={`ml-2 font-medium ${
-                                                    svc.serviceId.status === "AVAILABLE" 
-                                                      ? "text-green-500" 
+                                                  <span className={`ml-2 font-medium ${svc.serviceId.status === "AVAILABLE"
+                                                      ? "text-green-500"
                                                       : "text-red-500"
-                                                  }`}>
+                                                    }`}>
                                                     • {svc.serviceId.status}
                                                   </span>
                                                 )}

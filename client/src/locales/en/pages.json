@@ -72,7 +72,7 @@
     "available": "available"
   },
   "partsCatalog": {
-    "title": "Parts & Materials Catalog",
+    "title": "Parts Catalog",
     "description": "Manage inventory and view all available parts",
     "searchPlaceholder": "Search parts...",
     "newPart": "New Part",
