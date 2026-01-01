@@ -108,34 +108,34 @@ app.use(express.json());
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(
-  helmet({
-    crossOriginResourcePolicy: { policy: "cross-origin" },
-  })
-);
+// app.use(
+//   helmet({
+//     crossOriginResourcePolicy: { policy: "cross-origin" },
+//   })
+// );
 
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:9090",
-  "https://repair-desk-production.up.railway.app/",
-  "https://repair-desk.vercel.app",
-  "http://192.168.67.1:5173/",
-];
+// const allowedOrigins = [
+//   "http://localhost:5173",
+//   "http://localhost:9090",
+//   "https://repair-desk-production.up.railway.app/",
+//   "https://repair-desk.vercel.app",
+//   "http://192.168.67.1:5173/",
+// ];
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-      return callback(new Error("Not allowed by CORS"));
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  })
-);
+// app.use(
+//   cors({
+//     origin: function (origin, callback) {
+//       if (!origin) return callback(null, true);
+//       if (allowedOrigins.includes(origin)) {
+//         return callback(null, true);
+//       }
+//       return callback(new Error("Not allowed by CORS"));
+//     },
+//     credentials: true,
+//     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+//   })
+// );
 
 // Rate limiters (only if Redis is available)
 let rateLimiter = null;
