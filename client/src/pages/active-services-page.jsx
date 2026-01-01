@@ -48,6 +48,10 @@ export default function ActiveServices() {
   }
 
   const filteredServices = useMemo(() => {
+    if (!searchQuery.trim() || !services) {
+      return services
+    }
+
     const q = searchQuery.toLowerCase()
 
     return services.filter((service) => {
@@ -62,10 +66,10 @@ export default function ActiveServices() {
   }, [searchQuery, services])
 
   const getServices = (items = []) =>
-    items.filter(item => item.itemType === "SERVICE")
+    items?.filter(item => item.itemType === "SERVICE")
 
   const getParts = (items = []) =>
-    items.filter(item => item.itemType === "PART")
+    items?.filter(item => item.itemType === "PART")
 
   const handleEdit = (service) => {
     navigate("/admin/service", {

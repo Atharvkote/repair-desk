@@ -119,7 +119,8 @@ const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:9090",
   "https://repair-desk-production.up.railway.app/",
-  "https://repair-desk.vercel.app"
+  "https://repair-desk.vercel.app",
+  "http://192.168.67.1:5173/",
 ];
 
 app.use(

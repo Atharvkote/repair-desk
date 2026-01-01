@@ -44,6 +44,8 @@ const PartsCatalog = () => {
     }, [])
 
     const filteredParts = useMemo(() => {
+       
+
         return parts?.filter((s) => {
             const nameMatch = s.name?.toLowerCase().includes(searchQuery.toLowerCase())
             const descMatch = s.description?.toLowerCase().includes(searchQuery.toLowerCase())
