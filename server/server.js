@@ -114,7 +114,6 @@ app.use(cookieParser());
 //   })
 // );
 
-
 // const allowedOrigins = [
 //   "http://localhost:5173",
 //   "http://localhost:9090",
@@ -136,6 +135,12 @@ app.use(cookieParser());
 //     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
 //   })
 // );
+
+app.use(
+  cors({
+    origin: "*",
+  })
+);
 
 // Rate limiters (only if Redis is available)
 let rateLimiter = null;
@@ -246,7 +251,6 @@ app.get("/health", (req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
-
 
 app.use("/api/v1/admin-auth", adminAuthRouter);
 app.use("/api/v1/auth", userAuthRouter);
