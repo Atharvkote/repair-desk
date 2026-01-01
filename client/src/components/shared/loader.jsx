@@ -59,7 +59,7 @@ export default function Loader() {
 
                                 {/* Center circle with icon */}
                                 <img
-                                    src="/timer.gif"
+                                    src="https://res.cloudinary.com/dgz7hqbl9/image/upload/v1764169366/timer_www2zc.gif"
                                     alt="Sand Clock Timer"
                                     width="200"
                                     height="200"

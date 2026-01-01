@@ -74,8 +74,11 @@
   "partsCatalog": {
     "title": "Parts Catalog",
     "description": "Manage inventory and view all available parts",
+    "desc": "Description",
     "searchPlaceholder": "Search parts...",
     "newPart": "New Part",
+    "actions": "Actions",
+    "status": "Status",
     "price": "Price",
     "stock": "Stock",
     "inStock": "In Stock",
