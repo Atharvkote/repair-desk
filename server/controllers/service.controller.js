@@ -3,7 +3,6 @@ import Service from "../models/service-catalog.model.js";
 export const createService = async (req, res) => {
   try {
     const { serviceCode, name, description, price, status } = req.body;
-console.log("Body" ,req.body);
     if (!serviceCode || !name || price === undefined) {
       return res.status(400).json({
         success: false,

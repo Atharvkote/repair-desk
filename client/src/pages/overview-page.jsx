@@ -93,7 +93,7 @@ const Overview = () => {
                         <div className="flex flex-col sm:flex-row gap-4 pt-6">
                             <Button
                                 onClick={() => navigate("/admin/service")}
-                                className="h-12 px-8 cursor-pointer bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white font-semibold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl group"
+                                className="h-12 px-10 cursor-pointer bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white font-semibold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl group"
                             >
                                 {t("overview.getStarted")}
                                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

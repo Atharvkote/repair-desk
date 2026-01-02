@@ -2,11 +2,13 @@
   "auth": {
     "welcomeBack": "Welcome back",
     "signInToAccount": "Sign in to your admin account to continue",
-    "emailAddress": "Email Address",
+    "emailAddress": "Phone Number",
     "password": "Password",
     "forgotPassword": "Forgot password?",
     "signIn": "Sign In",
     "signingIn": "Signing in...",
+    "loginFailed":"Oops! Login Failed!",
+    "loginSuccess":"Hurry!! Logged in successfully!!!",
     "pleaseFillAllFields": "Please fill in all fields"
   },
   "settings": {

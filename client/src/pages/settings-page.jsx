@@ -19,20 +19,37 @@ import { Eye, EyeOff, Globe, Lock, User, Trash2, AlertTriangle, Bell, Shield } f
 import { IoMdSettings } from "react-icons/io";
 import ToggleTabs from "@/components/customs/toggle-tabs"
 import { TbCurrencyRupeeNepalese } from "react-icons/tb";
-import { RiEnglishInput } from "react-icons/ri";
+import { RiEnglishInput, RiShieldUserFill } from "react-icons/ri";
 import { toast } from "sonner"
 import { useLanguage } from "@/hooks/useLanguage"
 import { useTranslation } from "react-i18next"
+import { useAdminAuth } from "@/contexts/admin-auth-context"
+import { FaLocationArrow, FaLock } from "react-icons/fa"
+import { FaPencil } from "react-icons/fa6"
+import Header from "@/components/shared/sytle-header"
+import { MdAccountBox } from "react-icons/md"
+import { ShieldUser } from "lucide-react"
+import { GrLocal, GrMapLocation } from "react-icons/gr"
+import { Square } from "lucide-react"
+import { CheckSquare } from "lucide-react"
 
 const SettingsPage = () => {
   const { currentLanguage, changeLanguage } = useLanguage()
   const { t } = useTranslation('common')
   const [activeTab, setActiveTab] = useState("account")
+  const { admin } = useAdminAuth();
   const [currentUser, setCurrentUser] = useState({
-    name: "John Doe",
-    email: "john@example.com",
-    phone: "+91 9876543210",
+    name: admin?.name,
+    email: admin?.email,
+    phone: admin?.phone,
+  });
+
+  const [notificationSettings, setNotificationSettings] = useState({
+    emailNotifications: true,
+    serviceUpdates: true,
+    adminAlerts: true,
   })
+
 
   const [showPassword, setShowPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
@@ -86,7 +103,7 @@ const SettingsPage = () => {
   const settingsTabs = [
     { id: "account", label: t("settings.account"), icon: User },
     { id: "security", label: t("settings.security"), icon: Lock },
-    { id: "preferences", label: t("settings.preferences"), icon: Globe },
+    { id: "preferences", label: t("settings.preferences"), icon: RiEnglishInput },
     { id: "notifications", label: t("settings.notifications"), icon: Bell },
   ]
 
@@ -130,27 +147,44 @@ const SettingsPage = () => {
             {activeTab === "account" && (
               <div className="max-w-2xl space-y-6">
                 <div>
-                  <h2 className="text-2xl font-bold text-foreground mb-6">{t("settings.accountInformation")}</h2>
+                  <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2"><MdAccountBox className="w-8 h-8 text-teal-600" /> {t("settings.accountInformation")}</h2>
 
                   {/* User Info Card */}
                   <div className="bg-teal-50 rounded-lg p-6 border border-teal-200 mb-6">
-                    <div className="flex items-center gap-4 mb-6">
-                      <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center">
-                        <span className="text-white font-bold text-2xl">{currentUser.name.charAt(0)}</span>
+                    <div className="flex justify-between items-center gap-4 mb-6">
+                      <div className="flex items-center gap-4">
+                        <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center">
+                          <span className="text-white font-bold text-2xl">{currentUser?.name?.charAt(0)}</span>
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-foreground text-lg">{currentUser?.name}</h3>
+                          <p className="text-sm text-muted-foreground">{currentUser?.email}</p>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="font-semibold text-foreground text-lg">{currentUser.name}</h3>
-                        <p className="text-sm text-muted-foreground">{currentUser.email}</p>
+                      {admin.role === "superadmin" ? <div>
+                        <Header flag={true} title={"SUPER ADMIN"} />
+                      </div> : <div>
+                        <Header title={"SITE ADMIN"} />
                       </div>
+                      }
                     </div>
 
                     {!editingAccount && (
-                      <Button
-                        onClick={() => setEditingAccount(true)}
-                        className="w-full bg-teal-600 hover:bg-teal-700 text-white cursor-pointer"
-                      >
-                        {t("settings.editAccount")}
-                      </Button>
+                      <div className="flex items-center gap-3">
+                        <Button
+                          onClick={() => setEditingAccount(true)}
+                          className="w-full bg-teal-600 rounded-xl hover:bg-teal-700 max-w-1/2 mx-auto text-white cursor-pointer"
+                        >
+                          <FaPencil />
+                          {t("settings.editAccount")}
+                        </Button>
+                        <Button
+                          onClick={() => setActiveTab("security")}
+                          className="flex items-center rounded-xl gap-2 w-full bg-teal-600 hover:bg-teal-700 max-w-1/2 mx-auto text-white cursor-pointer"
+                        >
+                          <FaLock />  Edit Password
+                        </Button>
+                      </div>
                     )}
                   </div>
 
@@ -214,16 +248,18 @@ const SettingsPage = () => {
                       <table className="w-full">
                         <tbody>
                           <tr className="border-b border-border">
-                            <td className="px-6 py-3 bg-gray-50 font-medium text-sm text-muted-foreground">{t("settings.name")}</td>
-                            <td className="px-6 py-3 text-foreground">{currentUser.name}</td>
+                            <td className="px-6 py-3 bg-teal-50 font-semibold text-sm text-muted-foreground">{t("settings.name")}</td>
+                            <td className="px-6 py-3 font-medium text-foreground">{currentUser?.name}</td>
                           </tr>
                           <tr className="border-b border-border">
-                            <td className="px-6 py-3 bg-gray-50 font-medium text-sm text-muted-foreground">{t("settings.email")}</td>
-                            <td className="px-6 py-3 text-foreground">{currentUser.email}</td>
+                            <td className="px-6 py-3 bg-teal-50 font-semibold text-sm text-muted-foreground">{t("settings.email")}</td>
+                            <td className="px-6 py-3 font-medium text-foreground">
+                              <a href={`mailto:${currentUser?.email}`} target="_blank" className="text-teal-600 underline">{currentUser?.email}</a>
+                            </td>
                           </tr>
                           <tr>
-                            <td className="px-6 py-3 bg-gray-50 font-medium text-sm text-muted-foreground">{t("settings.phone")}</td>
-                            <td className="px-6 py-3 text-foreground">{currentUser.phone}</td>
+                            <td className="px-6 py-3 bg-teal-50 font-semibold text-sm text-muted-foreground">{t("settings.phone")}</td>
+                            <td className="px-6 py-3 font-medium text-foreground">IN +91 {currentUser?.phone}</td>
                           </tr>
                         </tbody>
                       </table>
@@ -236,7 +272,7 @@ const SettingsPage = () => {
             {/* Security Tab */}
             {activeTab === "security" && (
               <div className="max-w-2xl space-y-6">
-                <h2 className="text-2xl font-bold text-foreground">{t("settings.securitySettings")}</h2>
+                <h2 className="text-2xl font-bold text-foreground flex items-center gap-2"><RiShieldUserFill className="w-8 h-8 text-teal-600" />{t("settings.securitySettings")}</h2>
 
                 {/* Change Password */}
                 <div className="bg-white border border-border rounded-lg p-6">
@@ -346,7 +382,7 @@ const SettingsPage = () => {
             {/* Preferences Tab */}
             {activeTab === "preferences" && (
               <div className="max-w-2xl space-y-6">
-                <h2 className="text-2xl font-bold text-foreground">{t("settings.preferences")}</h2>
+                <h2 className="text-2xl font-bold text-foreground flex items-center gap-2"><FaLocationArrow className="w-5 h-5 text-teal-600" />{t("settings.preferences")}</h2>
 
                 {/* Language Selection */}
                 <div className="bg-white border border-border rounded-lg p-6">
@@ -381,7 +417,7 @@ const SettingsPage = () => {
             {/* Notifications Tab */}
             {activeTab === "notifications" && (
               <div className="max-w-2xl space-y-6">
-                <h2 className="text-2xl font-bold text-foreground">{t("settings.notifications")}</h2>
+                <h2 className="text-2xl font-bold text-foreground flex items-center gap-2"><Bell className="w-8 h-8 text-teal-600" />{t("settings.notifications")}</h2>
 
                 <div className="bg-white border border-border rounded-lg overflow-hidden">
                   <table className="w-full">
@@ -395,19 +431,61 @@ const SettingsPage = () => {
                       <tr className="border-b border-border hover:bg-gray-50">
                         <td className="px-6 py-3 text-sm text-foreground">{t("settings.emailNotifications")}</td>
                         <td className="px-6 py-3 text-center">
-                          <input type="checkbox" defaultChecked className="w-4 h-4 cursor-pointer" />
+                          <button onClick={
+                            () => {
+                              setNotificationSettings({
+                                ...notificationSettings,
+                                emailNotifications: !notificationSettings.emailNotifications
+                              });
+                              toast.warning("Notification Setting has been updated!!.");
+                            }}
+                            className="hover:text-teal-600 cursor-pointer transition-colors">
+                            {notificationSettings.emailNotifications ? (
+                              <CheckSquare className="w-5 h-5 text-teal-600" />
+                            ) : (
+                              <Square className="w-5 h-5 text-slate-400" />
+                            )}
+                          </button>
                         </td>
                       </tr>
                       <tr className="border-b border-border hover:bg-gray-50">
                         <td className="px-6 py-3 text-sm text-foreground">{t("settings.serviceUpdates")}</td>
                         <td className="px-6 py-3 text-center">
-                          <input type="checkbox" defaultChecked className="w-4 h-4 cursor-pointer" />
+                          <button onClick={
+                            () => {
+                              setNotificationSettings({
+                                ...notificationSettings,
+                                serviceUpdates: !notificationSettings.serviceUpdates
+                              });
+                              toast.warning("Notification Setting has been updated!!.");
+                            }}
+                            className="hover:text-teal-600 cursor-pointer transition-colors">
+                            {notificationSettings.serviceUpdates ? (
+                              <CheckSquare className="w-5 h-5 text-teal-600" />
+                            ) : (
+                              <Square className="w-5 h-5 text-slate-400" />
+                            )}
+                          </button>
                         </td>
                       </tr>
                       <tr className="hover:bg-gray-50">
                         <td className="px-6 py-3 text-sm text-foreground">{t("settings.adminAlerts")}</td>
                         <td className="px-6 py-3 text-center">
-                          <input type="checkbox" defaultChecked className="w-4 h-4 cursor-pointer" />
+                          <button onClick={
+                            () => {
+                              setNotificationSettings({
+                                ...notificationSettings,
+                                adminAlerts: !notificationSettings.adminAlerts
+                              });
+                              toast.warning("Notification Setting has been updated!!.");
+                            }}
+                            className="hover:text-teal-600 cursor-pointer transition-colors">
+                            {notificationSettings.adminAlerts ? (
+                              <CheckSquare className="w-5 h-5 text-teal-600" />
+                            ) : (
+                              <Square className="w-5 h-5 text-slate-400" />
+                            )}
+                          </button>
                         </td>
                       </tr>
                     </tbody>

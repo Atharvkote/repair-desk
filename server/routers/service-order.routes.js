@@ -1,5 +1,5 @@
 import express from "express";
-import { authMiddleware } from "../middlewares/auth.middleware.js";
+import { adminAuthMiddleware } from "../middlewares/admin-auth-middleware.js";
 import {
   addPartItem,
   addServiceItem,
@@ -20,7 +20,7 @@ import {
 
 const router = express.Router();
 
-router.use(authMiddleware);
+router.use(adminAuthMiddleware);
 
 router.post("/draft", createDraftOrder);
 router.get("/", getOrders);

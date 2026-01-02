@@ -28,6 +28,7 @@ import { MdFolderShared } from "react-icons/md";
 import { FaBoxArchive, FaCircleNodes, FaFolderOpen, FaInbox, FaLocationArrow, FaStaylinked, FaUserClock, } from "react-icons/fa6"
 import { useTranslation } from "react-i18next"
 import { BsFillCloudHaze2Fill } from "react-icons/bs";
+import { useAdminAuth } from "@/contexts/admin-auth-context"
 
 
 export default function Sidebar() {
@@ -36,6 +37,7 @@ export default function Sidebar() {
   const [openMenus, setOpenMenus] = useState({
     catalog: pathname.startsWith("/admin/catalog"),
   })
+  const { logout } = useAdminAuth();
 
   const toggleMenu = (key) => {
     setOpenMenus((prev) => ({ ...prev, [key]: !prev[key] }))
@@ -48,23 +50,23 @@ export default function Sidebar() {
         { label: t("overview"), icon: FaHome, href: "/admin" },
         {
           label: t("services"),
-          icon: FaFolderOpen ,
+          icon: FaFolderOpen,
           href: "#",
           id: "services",
           subItems: [
             { label: t("newService"), icon: PlusIcon, href: "/admin/service" },
-            { label: t("activeServices"), icon: FaLocationArrow   , href: "/admin/service/list" },
+            { label: t("activeServices"), icon: FaLocationArrow, href: "/admin/service/list" },
           ],
         },
-        { label: t("history"), icon: FaUserClock , href: "/admin/history" },
+        { label: t("history"), icon: FaUserClock, href: "/admin/history" },
         {
           label: t("catalog"),
           icon: SiBookstack,
           href: "#",
           id: "catalog",
           subItems: [
-            { label: t("serviceCatalog"), icon: FaCircleNodes    , href: "/admin/catalog/services" },
-            { label: t("partsCatalog"), icon: FaInbox   , href: "/admin/catalog/parts" },
+            { label: t("serviceCatalog"), icon: FaCircleNodes, href: "/admin/catalog/services" },
+            { label: t("partsCatalog"), icon: FaInbox, href: "/admin/catalog/parts" },
           ],
         },
         { label: t("reports"), icon: IoBarChartSharp, href: "/admin/reports" },
@@ -202,14 +204,14 @@ export default function Sidebar() {
       {/* User / Bottom Section */}
       <div className="p-4 mt-auto bg-slate-50/50 border-t border-slate-100">
         <div className="space-y-1">
-          <button className="flex items-center gap-3.5 px-4 py-2.5 w-full rounded-xl text-slate-600 hover:text-slate-900 hover:bg-white hover:shadow-sm transition-all duration-200 group">
+          <button className="flex cursor-pointer items-center gap-3.5 px-4 py-2.5 w-full rounded-xl text-slate-600 hover:text-slate-900 hover:bg-white hover:shadow-sm transition-all duration-200 group">
             <Bell className="w-[18px] h-[18px] text-slate-400 group-hover:text-teal-500" />
             <span className="text-[13.5px] font-medium">{t("notifications")}</span>
             <span className="ml-auto w-5 h-5 bg-teal-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
               3
             </span>
           </button>
-          <button className="flex items-center gap-3.5 px-4 py-2.5 w-full rounded-xl text-rose-600 hover:bg-rose-50/80 transition-all duration-200 group">
+          <button onClick={logout} className="flex cursor-pointer items-center gap-3.5 px-4 py-2.5 w-full rounded-xl text-rose-600 hover:bg-rose-50/80 transition-all duration-200 group">
             <LogOut className="w-[18px] h-[18px] group-hover:translate-x-0.5 transition-transform" />
             <span className="text-[13.5px] font-medium">{t("signOut")}</span>
           </button>

@@ -503,7 +503,7 @@ export const startOrder = async (req, res) => {
 
     const transformed = transformOrderForFrontend(order);
     emitOrderUpdate(orderId, "order:started", transformed);
-    console.log(transformed);
+    // console.log(transformed);
     res.status(200).json({
       success: true,
       data: transformed,
@@ -621,7 +621,7 @@ export const getOrders = async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(100);
 
-      console.log(orders);
+      // Debug console.log(orders);
 
 
     res.status(200).json({
@@ -640,9 +640,7 @@ export const addItem = async (req, res) => {
   try {
     const { orderId } = req.params;
     const { itemId, quantity, type } = req.body;
-    console.log("itemid" + itemId);
-    console.log("type" + type);
-    console.log("quantity" + quantity);
+
     if (!itemId || !type) {
       return res.status(400).json({
         success: false,

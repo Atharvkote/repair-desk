@@ -87,7 +87,7 @@
     "edit": "Edit"
   },
   "teams": {
-    "title": "Teams",
+    "title": "Admin Team",
     "description": "Create, manage, and view all team admins",
     "searchPlaceholder": "Search by name, email, or phone...",
     "newAdmin": "New Admin",

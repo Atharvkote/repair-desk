@@ -3,6 +3,7 @@
 import { X, Settings, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { ExternalLink } from "lucide-react"
 
 const AdminDetailSidebar = ({ admin, open, onClose }) => {
   if (!admin) return null
@@ -11,17 +12,15 @@ const AdminDetailSidebar = ({ admin, open, onClose }) => {
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 z-[60] bg-black/30 backdrop-blur-sm transition-opacity duration-300 ${
-          open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
+        className={`fixed inset-0 z-[60] bg-black/30 backdrop-blur-sm transition-opacity duration-300 ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+          }`}
         onClick={onClose}
       />
 
       {/* Slide-over */}
       <aside
-        className={`fixed top-0 right-0 h-screen w-full max-w-md z-[70] transform transition-transform duration-300 ease-in-out ${
-          open ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`fixed top-0 right-0 h-screen w-full max-w-md z-[70] transform transition-transform duration-300 ease-in-out ${open ? "translate-x-0" : "translate-x-full"
+          }`}
       >
         <div className="h-full flex flex-col p-4">
           {/* Header with gradient */}
@@ -51,13 +50,13 @@ const AdminDetailSidebar = ({ admin, open, onClose }) => {
               {/* Status Badge */}
               <div className="flex justify-center">
                 <Badge
-                  className={`px-3 py-1 rounded-full text-sm ${
-                    admin.status === "active"
-                      ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
-                      : "bg-gray-100 text-gray-800 border border-gray-300"
-                  }`}
+                  className={
+                    admin.role === "superadmin"
+                      ? "bg-red-100 text-red-800 border-red-300"
+                      : "bg-teal-100 text-teal-800 border-real-300"
+                  }
                 >
-                  {admin.status.charAt(0).toUpperCase() + admin.status.slice(1)}
+                  {admin.role === "superadmin" ? "SUPER ADMIN" : "ADMIN"}
                 </Badge>
               </div>
 
@@ -69,7 +68,7 @@ const AdminDetailSidebar = ({ admin, open, onClose }) => {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Phone Number</p>
-                  <p className="text-sm text-foreground mt-1">{admin.phone}</p>
+                  <p className="text-sm text-foreground mt-1">IN +91{admin.phone}</p>
                 </div>
               </div>
 
@@ -80,15 +79,36 @@ const AdminDetailSidebar = ({ admin, open, onClose }) => {
                   <span className="font-semibold text-foreground">Information</span>
                 </div>
                 <div className="space-y-2 text-sm text-muted-foreground">
-                  <p>
-                    Admin ID: <span className="text-foreground font-medium">{admin.id}</span>
+                  <p className="font-semibold">
+                    Admin Id : <span className="text-foreground font-medium">{admin._id}</span>
                   </p>
-                  <p>
-                    Status: <span className="text-foreground font-medium capitalize">{admin.status}</span>
+                  <p className="font-semibold">
+                    Status : <span className="text-foreground font-medium capitalize">Active</span>
                   </p>
                   <p className="text-xs text-teal-600 mt-3">
                     This admin has full access to system management and configuration.
                   </p>
+                </div>
+              </div>
+              <div className="bg-white rounded-md p-4 border border-border">
+                <div className="flex items-center gap-2 mb-3">
+                  <Settings className="h-4 w-4 text-teal-600" />
+                  <span className="font-semibold text-foreground">Socials</span>
+                </div>
+                <div className="space-y-2 text-sm text-muted-foreground">
+                  <p className="font-semibold">
+                    Admin mail : <span className="text-foreground font-medium">{admin.email}</span>
+                  </p>
+                  <a
+                    href={`mailto:${admin.email}`}
+                    target="_blank"
+                  >
+                    <Button
+                      className={'flex items-center gap-2'}
+                    >
+                      <ExternalLink className="h-4 w-4 text-white" />
+                      Contact Admin
+                    </Button></a>
                 </div>
               </div>
             </div>

@@ -46,6 +46,7 @@ await connectDB();
 // Routers
 import adminAuthRouter from "./routers/admin-auth.routes.js";
 import userAuthRouter from "./routers/user-auth.routes.js";
+import { adminAuthMiddleware } from "./middlewares/admin-auth-middleware.js";
 
 const app = express();
 const SERVER_PORT = process.env.SERVER_PORT || 5000;
@@ -248,7 +249,7 @@ app.get("/health", (req, res) => {
   });
 });
 
-app.use("/api/v1/admin-auth", adminAuthRouter);
+app.use("/api/admin", adminAuthRouter);
 app.use("/api/v1/auth", userAuthRouter);
 
 // Import and use new routes
@@ -262,8 +263,6 @@ app.use("/api/services", serviceRouter);
 app.use("/api/parts", partRouter);
 app.use("/api/orders", serviceOrderRouter);
 
-// If you want to restrict certain sensitive endpoints with the limiter:
-// app.use("/api/v1/sensitive", sensitiveEndpointsLimiter, sensitiveRouter);
 
 // Global error handler middleware (must be after all routes)
 app.use((err, req, res, next) => {

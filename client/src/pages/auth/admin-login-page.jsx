@@ -4,133 +4,130 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Lock, Mail, ArrowRight, CheckCircle2 } from "lucide-react"
-import { FaLock } from "react-icons/fa6"
+import { Lock, Mail, ArrowRight, CheckCircle2, Eye, EyeOff } from "lucide-react"
 import { useTranslation } from "react-i18next"
+import { useAdminAuth } from "@/contexts/admin-auth-context"
+import { toast } from "sonner"
+import Header from "@/components/shared/sytle-header"
 
 const Login = () => {
-  const { t } = useTranslation('common')
+  const { t } = useTranslation("common")
   const navigate = useNavigate()
-  const [email, setEmail] = useState("")
+  const { login } = useAdminAuth()
+  const [phone, setPhone] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [showPassword, setShowPassword] = useState(false)
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    setError("")
+  const handleSubmit = async (e) => {
+    try {
+      e.preventDefault()
+      setError("")
 
-    if (!email.trim() || !password.trim()) {
-      setError(t("auth.pleaseFillAllFields"))
-      return
-    }
+      if (!phone.trim() || !password.trim()) {
+        setError(t("auth.pleaseFillAllFields"))
+        return
+      }
 
-    setIsLoading(true)
-    setTimeout(() => {
+      setIsLoading(true)
+      const response = await login(phone, password)
+
+      if (response.success) {
+        toast.success(t("auth.loginSuccess") || "Login successful")
+        navigate("/admin")
+      } else {
+        setError(response.message || t("auth.loginFailed") || "Login failed")
+        toast.error(response.message || t("auth.loginFailed") || "Login failed")
+      }
+    } catch (error) {
+      const errorMessage = error?.response?.data?.message || error?.message || "Failed to login"
+      setError(errorMessage)
+      toast.error(errorMessage)
+    } finally {
       setIsLoading(false)
-      navigate("/admin/service")
-    }, 1500)
+    }
   }
-
-  if (isLoading) return (
-    <Loader />
-  )
 
   return (
     <div className="min-h-screen bg-white overflow-hidden">
-      <div className="grid grid-cols-1 lg:grid-cols-2 h-screen">
+      <div className="grid grid-cols-1 lg:grid-cols-2 min-h-screen">
         {/* Left Side - Hero Section */}
-        <div className="hidden lg:flex flex-col items-center justify-center p-12 relative overflow-hidden">
-          <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute top-20 left-10 w-72 h-72 bg-white rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-            <div className="absolute -bottom-8 right-10 w-72 h-72 bg-white rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-            <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-white rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
+        <div className="hidden lg:flex flex-col items-center justify-center p-12 relative overflow-hidden bg-teal-600">
+          <div className="absolute inset-0 overflow-hidden opacity-20">
+            <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_30%_20%,rgba(20,184,166,0.15)_0%,transparent_50%)]"></div>
+            <div className="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(circle_at_70%_80%,rgba(13,148,136,0.15)_0%,transparent_50%)]"></div>
           </div>
 
           {/* Content */}
-          <div className="relative z-10 text-center space-y-8">
+          <div className="relative z-10 text-center space-y-8 max-w-lg">
             {/* Logo/Icon */}
-            <div className="inline-flex items-center justify-center w-46 h-46 rounded-2xl bg-white shadow-lg animate-float">
-              <img src="/logo-2.png" alt="logo" className="w-full h-full object-contain" />
+            <div className="inline-flex items-center justify-center w-48 h-48 rounded-2xl bg-white shadow-lg border-2 border-teal-100">
+              <img src="/logo-2.png" alt="logo" className="w-44 h-44 object-contain" />
             </div>
 
-            {/* Heading */}
             <div className="space-y-4">
-              <h1 className="text-5xl font-bold text-foreground leading-tight">
-                {t("login.manageServices")}{" "}
-                <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                  {t("login.services")}
-                </span>{" "}
-                {t("login.and")}{" "}
-                <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">{t("login.parts")}</span>
+              <h1 className="text-5xl font-bold text-white leading-tight text-balance">
+                {t("login.manageServices")} <span className="text-white">{t("login.services")}</span>{" "}
+                {t("login.and")} <span className="text-white">{t("login.parts")}</span>
               </h1>
-              <p className="text-lg text-foreground max-w-md mx-auto">
+              <p className="text-base text-white max-w-md mx-auto text-pretty leading-relaxed">
                 {t("login.dashboardDescription")}
               </p>
             </div>
 
             {/* Features */}
-            <div className="space-y-3 pt-4">
+            <div className="space-y-3 pt-6">
               {[t("login.realTimeTracking"), t("login.serviceManagement"), t("login.analyticsReports")].map(
                 (feature, i) => (
                   <div
                     key={i}
-                    className="flex items-center justify-center gap-3 text-sm text-primary animate-fade-in"
+                    className="flex justify-start mx-auto max-w-xs items-center gap-3 text-sm text-white"
                     style={{ animationDelay: `${i * 100}ms` }}
                   >
-                    <CheckCircle2 className="w-5 h-5 text-primary" />
-                    <span>{feature}</span>
+                    <div className="w-5 h-5 rounded-full bg-teal-100 flex items-center justify-center flex-shrink-0">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-teal-600" />
+                    </div>
+                    <span className="font-medium">{feature}</span>
                   </div>
                 ),
               )}
             </div>
-
-
           </div>
         </div>
 
         {/* Right Side - Login Form */}
-        <div className="flex flex-col bg-primary items-center justify-center p-6 sm:p-12">
+        <div className="flex flex-col items-center justify-center p-6 sm:p-12 bg-white">
           <div className="w-full max-w-md space-y-8">
             {/* Header */}
-            <div className="space-y-3 text-center lg:text-left">
-              <div className="inline-flex lg:hidden items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary/70 mb-4">
-                <Lock className="w-6 h-6 text-white" />
+            <div className="space-y-3">
+              <div className="lg:hidden flex justify-center mb-6">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-white border-2 border-teal-100">
+                  <img src="/logo-2.png" alt="logo" className="w-12 h-12 object-contain" />
+                </div>
               </div>
-              <h2 className="text-4xl font-bold text-white flex items-center gap-3"><FaLock className="w-8 h-8" /> {t("auth.welcomeBack")}</h2>
-              <p className="text-sm text-white">{t("auth.signInToAccount")}</p>
+              <h2 className="text-xl font-bold text-teal-900"> <Header size={'text-5xl'} title={t("auth.welcomeBack")}/></h2>
+              <p className="text-sm text-teal-700">{t("auth.signInToAccount")}</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
               {error && (
-                <div className="p-4 rounded-lg bg-red-50 border border-red-200 animate-shake">
-                  <p className="text-sm font-medium text-red-800">{error}</p>
+                <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20">
+                  <p className="text-sm font-medium text-destructive">{error}</p>
                 </div>
               )}
 
               {/* Email Field */}
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-white">{t("auth.emailAddress")}</label>
+                <label className="text-sm font-medium text-teal-900">{t("auth.emailAddress")}</label>
                 <div className="relative group">
-                  <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white group-focus-within:text-white transition-colors" />
+                  <Mail className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-teal-500 group-focus-within:text-teal-700 transition-colors pointer-events-none z-10" />
                   <Input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="admin@example.com"
-                    className=" h-11 w-full
-      pl-10 pr-10
-      bg-transparent
-      border border-white/30
-      rounded-lg
-      text-white
-      placeholder:text-white/50
-      focus:border-white
-      focus:ring-2 focus:ring-white/20
-      focus:outline-none
-      transition-all duration-200
-      shadow-lg"
+                    type="text"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="8830xxxx788"
+                    className="h-12 w-full pl-11 pr-4 bg-teal-50/50 border-teal-600 rounded-xl text-teal-900 placeholder:text-teal-600 focus:bg-white focus:border-teal-600 focus:ring-2 focus:ring-teal-600 transition-all duration-200"
                     disabled={isLoading}
                   />
                 </div>
@@ -139,65 +136,28 @@ const Login = () => {
               {/* Password Field */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-sm font-semibold text-white">{t("auth.password")}</label>
-                  <a href="#" className="text-xs text-white hover:underline">
+                  <label className="text-sm font-medium text-teal-900">{t("auth.password")}</label>
+                  <a href="#" className="text-xs text-teal-600 hover:text-teal-800 transition-colors">
                     {t("auth.forgotPassword")}
                   </a>
                 </div>
                 <div className="relative group">
-                  <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white group-focus-within:text-white transition-colors" />
+                  <Lock className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-teal-500 group-focus-within:text-teal-700 transition-colors pointer-events-none z-10" />
                   <Input
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••••"
                     disabled={isLoading}
-                    className="
-      h-11 w-full
-      pl-10 pr-10
-      bg-transparent
-      border border-white/30
-      rounded-lg
-      text-white
-      placeholder:text-white/50
-      focus:border-white
-      focus:ring-2 focus:ring-white/20
-      focus:outline-none
-      transition-all duration-200
-      shadow-lg
-    "
+                    className="h-12 w-full pl-11 pr-11 bg-teal-50/50 border-teal-600 rounded-xl text-teal-900 placeholder:text-teal-400 focus:bg-white focus:border-teal-400 focus:ring-2 focus:ring-teal-600 transition-all duration-200"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white hover:text-white transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-teal-500 hover:text-teal-700 transition-colors"
                     disabled={isLoading}
                   >
-                    {showPassword ? (
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                        />
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                        />
-                      </svg>
-                    ) : (
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-4.803m5.596-3.856a3.375 3.375 0 11-4.753 4.753m4.753-4.753L3.73 3.73"
-                        />
-                      </svg>
-                    )}
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
               </div>
@@ -206,11 +166,11 @@ const Login = () => {
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full h-11 bg-transparent border-2 cursor-pointer  border-white hover:text-primary hover:bg-white text-white font-semibold rounded-lg transition-colors duration-300 disabled:opacity-70 flex items-center justify-center gap-2 group"
+                className="w-full h-12 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-xl transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2 group shadow-sm"
               >
                 {isLoading ? (
                   <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                     {t("auth.signingIn")}
                   </>
                 ) : (
@@ -221,7 +181,6 @@ const Login = () => {
                 )}
               </Button>
             </form>
-
           </div>
         </div>
       </div>

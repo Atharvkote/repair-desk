@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { privateKey } from "../configs/jwt.js";
 import "dotenv/config";
 
 
@@ -27,16 +28,19 @@ adminSchema.methods.comparePassword = async function (candidatePassword) {
 };
 
 adminSchema.methods.generateToken = async function () {
-  return  jwt.sign(
+  return jwt.sign(
     {
       id: this._id,
       role: this.role,
       phone: this.phone,
       email: this.email,
     },
-    process.env.JWT_SECRET,
+    privateKey,
     {
+      algorithm: "RS256",
       expiresIn: "7d",
+      issuer: "repair-desk-admin",
+      audience: "repair-desk-api",
     }
   );
 };

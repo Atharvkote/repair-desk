@@ -8,18 +8,18 @@ import {
   loginAdmin,
   updateAdmin,
 } from "../controllers/admin.controller.js";
-import { authMiddleware } from "../middlewares/auth.middleware.js";
+import { adminAuthMiddleware } from "../middlewares/admin-auth-middleware.js";
 
 const router = Router();
 
 router.post("/", createAdmin);
 router.post("/login", loginAdmin);
 
-router.get("/", getAdmins);
-router.get("/:id", getAdmin);
+router.get("/", adminAuthMiddleware, getAdmins);
+router.get("/me", adminAuthMiddleware, getAdmin);
 
-router.get("/check-auth", authMiddleware, checkAuth);
-router.patch("/:id", authMiddleware, updateAdmin);
-router.delete("/:id", authMiddleware, deleteAdmin);
+router.get("/check-auth", adminAuthMiddleware, checkAuth);
+router.patch("/:id", adminAuthMiddleware, updateAdmin);
+router.delete("/:id", adminAuthMiddleware, deleteAdmin);
 
 export default router;

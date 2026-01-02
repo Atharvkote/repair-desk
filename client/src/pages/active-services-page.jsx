@@ -39,7 +39,7 @@ export default function ActiveServices() {
     try {
       setLoading(true)
       const response = await orderService.getOngoingOrders()
-      console.log("Fetched services:", response.data)
+      // console.log("Fetched services:", response.data)
       setServices(response.data)
     } catch (error) {
       console.error("Error fetching services:", error)

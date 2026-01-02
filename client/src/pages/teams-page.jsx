@@ -13,14 +13,32 @@ import { GrUserAdmin } from "react-icons/gr"
 import { MdAdminPanelSettings } from "react-icons/md"
 import { FaEye, FaTrash } from "react-icons/fa6"
 import { useTranslation } from "react-i18next"
+import { toast } from "sonner"
+import { authService } from "@/services/auth.service"
+import { useEffect } from "react"
+import { useMemo } from "react"
+import { useAdminAuth } from "@/contexts/admin-auth-context"
+import Header from "@/components/shared/sytle-header"
 
 const AdminManagement = () => {
   const { t } = useTranslation('pages')
-  const [admins, setAdmins] = useState([
-    { id: "1", name: "John Doe", phone: "+91 9876543210", email: "john@example.com", status: "active" },
-    { id: "2", name: "Jane Smith", phone: "+91 9876543211", email: "jane@example.com", status: "active" },
-    { id: "3", name: "Mike Johnson", phone: "+91 9876543212", email: "mike@example.com", status: "inactive" },
-  ])
+  const [admins, setAdmins] = useState([])
+  const { admin } = useAdminAuth();
+  const role = admin?.role;
+  
+
+  const fetchAdmin = async () => {
+    try {
+      const data = await authService.getAdmins()
+      setAdmins(data)
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to fetch services")
+    }
+  }
+
+  useEffect(() => {
+    fetchAdmin()
+  }, [])
 
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedAdmin, setSelectedAdmin] = useState(null)
@@ -29,12 +47,15 @@ const AdminManagement = () => {
   const [createSidebarOpen, setCreateSidebarOpen] = useState(false)
   const [editingAdmin, setEditingAdmin] = useState(null)
 
-  const filteredAdmins = admins.filter(
-    (a) =>
-      a.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      a.phone.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      a.email.toLowerCase().includes(searchQuery.toLowerCase()),
-  )
+  const filteredAdmins = useMemo(() => {
+    return admins?.filter(
+      (a) =>
+        a.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        a.phone.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        a.email.toLowerCase().includes(searchQuery.toLowerCase()),
+    )
+
+  }, [admins, searchQuery])
 
   const handleView = (admin) => {
     setSelectedAdmin(admin)
@@ -66,7 +87,7 @@ const AdminManagement = () => {
       <div className="bg-white p-6 rounded-xl border border-border shadow-sm space-y-6">
 
         <div className="space-y-2 ">
-          <h1 className="text-2xl font-bold text-teal-600 flex items-center gap-2"><MdAdminPanelSettings className="w-8 h-8" /> {t("teams.title")}</h1>
+          <h1 className="text-2xl font-bold text-teal-600 flex items-center gap-2"><MdAdminPanelSettings className="w-8 h-8" /> <Header  title={t("teams.title")}/></h1>
           <p className="text-muted-foreground">{t("teams.description")}</p>
         </div>
 
@@ -95,6 +116,7 @@ const AdminManagement = () => {
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">{t("teams.name")}</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">{t("teams.email")}</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">{t("teams.phone")}</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Role</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">{t("teams.status")}</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">{t("teams.actions")}</th>
             </tr>
@@ -109,12 +131,21 @@ const AdminManagement = () => {
                   <td className="px-6 py-4">
                     <Badge
                       className={
-                        admin.status === "active"
-                          ? "bg-emerald-100 text-emerald-800 border-emerald-300"
-                          : "bg-gray-100 text-gray-800 border-gray-300"
+                        admin.role === "superadmin"
+                          ? "bg-red-100 text-red-800 border-red-300"
+                          : "bg-teal-100 text-teal-800 border-real-300"
                       }
                     >
-                      {admin.status === "active" ? t("teams.active") : t("teams.inactive")}
+                      {admin.role === "superadmin" ? "SUPER ADMIN" : "ADMIN"}
+                    </Badge>
+                  </td>
+                  <td className="px-6 py-4">
+                    <Badge
+                      className={
+                        "bg-teal-100 text-teal-800 border-real-300"
+                      }
+                    >
+                      Active
                     </Badge>
                   </td>
                   <td className="px-6 py-4">
@@ -133,13 +164,13 @@ const AdminManagement = () => {
                       >
                         <Edit2 className="w-4 h-4" />
                       </Button> */}
-                      <Button
+                      {role === "superadmin" && <Button
                         onClick={() => handleDelete(admin.id)}
                         size="sm"
                         className="bg-red-600 hover:bg-red-700 text-white gap-2 cursor-pointer"
                       >
                         <FaTrash className="w-4 h-4" />
-                      </Button>
+                      </Button>}
                     </div>
                   </td>
                 </tr>

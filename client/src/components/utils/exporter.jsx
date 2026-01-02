@@ -27,82 +27,90 @@ const splitItems = (items = []) => {
 ====================================================== */
 
 export const generateReceipt = (service) => {
-  const doc = new jsPDF()
+  const doc = new jsPDF("p", "mm", "a4")
   const { services, parts } = splitItems(service.items)
+
+  const PRIMARY = [15, 118, 110]
+  const GRAY = [120, 120, 120]
+
+  /* ---------- Background Card ---------- */
+  doc.setFillColor(245, 247, 250)
+  doc.rect(10, 10, 190, 277, "F")
 
   /* ---------- Header ---------- */
   doc.setFont("helvetica", "bold")
-  doc.setFontSize(22)
-  doc.text("Mate Tractor", 20, 20)
+  doc.setFontSize(24)
+  doc.setTextColor(...PRIMARY)
+  doc.text("Mate Tractor", 105, 25, { align: "center" })
 
   doc.setFontSize(10)
   doc.setFont("helvetica", "normal")
-  doc.text("Serving farmers with trust since 1991", 20, 27)
+  doc.setTextColor(...GRAY)
+  doc.text("Serving farmers with trust since 1991", 105, 32, { align: "center" })
 
-  doc.text("Contact: +91 98765 43210", 140, 18)
-  doc.text("Email: support@matetractor.com", 140, 24)
-  doc.text("Pune, Maharashtra, India", 140, 30)
+  doc.text("+91 98765 43210 | support@matetractor.com", 105, 38, { align: "center" })
+  doc.text("Pune, Maharashtra, India", 105, 44, { align: "center" })
 
-  doc.line(20, 35, 190, 35)
+  doc.setDrawColor(...PRIMARY)
+  doc.line(20, 48, 190, 48)
 
   /* ---------- Title ---------- */
   doc.setFontSize(16)
   doc.setFont("helvetica", "bold")
-  doc.text("SERVICE RECEIPT", 105, 45, { align: "center" })
+  doc.setTextColor(0)
+  doc.text("SERVICE RECEIPT", 105, 60, { align: "center" })
 
-  /* ---------- Order Info ---------- */
+  /* ---------- Order Info Box ---------- */
+  doc.setFillColor(255)
+  doc.roundedRect(20, 68, 170, 30, 4, 4, "F")
+
   doc.setFontSize(10)
   doc.setFont("helvetica", "normal")
-  doc.text(`Order No: ${service.orderNumber || service._id}`, 20, 60)
-  doc.text(`Order Date: ${formatDate(service.createdAt)}`, 20, 66)
-  doc.text(`Completed: ${formatDate(service.completedAt)}`, 20, 72)
+  doc.text(`Order No: ${service.orderNumber || service._id}`, 25, 78)
+  doc.text(`Order Date: ${formatDate(service.createdAt)}`, 25, 85)
 
-  /* ---------- Customer ---------- */
-  doc.setFont("helvetica", "bold")
-  doc.text("Customer Details", 20, 85)
-
-  doc.setFont("helvetica", "normal")
-  doc.text(`Name: ${service.customerId?.name}`, 20, 92)
-  doc.text(`Phone: ${service.customerId?.phone}`, 20, 98)
-  doc.text(`Email: ${service.customerId?.email || "-"}`, 20, 104)
+  doc.text(`Customer: ${service.customerId?.name}`, 120, 78)
+  doc.text(`Phone: ${service.customerId?.phone}`, 120, 85)
+  doc.text(`Email: ${service.customerId?.email || "-"}`, 120, 92)
 
   /* ---------- Tractor ---------- */
   doc.setFont("helvetica", "bold")
-  doc.text("Tractor Details", 120, 85)
+  doc.text("Tractor Details", 20, 110)
 
   doc.setFont("helvetica", "normal")
-  doc.text(`Brand: ${service.tractor?.name}`, 120, 92)
-  doc.text(`Model: ${service.tractor?.model}`, 120, 98)
+  doc.text(`Brand: ${service.tractor?.name}`, 20, 118)
+  doc.text(`Model: ${service.tractor?.model} `, 20, 124)
 
   /* ---------- Items Table ---------- */
   const tableRows = [
     ...services.map(s => [
       s.serviceId?.title || s.name,
       s.quantity,
-      `Rs.${s.unitPrice} /-`,
-      `Rs.${s.lineTotals?.final} /-`,
+      `Rs. ${s.unitPrice} /-`,
+      `Rs. ${s.lineTotals?.final} /-`,
     ]),
     ...parts.map(p => [
       p.partId?.title,
       p.quantity,
-      `Rs.${p.unitPrice} /-`,
-      `Rs.${p.lineTotals?.final} /-`,
+      `Rs. ${p.unitPrice} /-`,
+      `Rs. ${p.lineTotals?.final} /-`,
     ]),
   ]
 
   autoTable(doc, {
-    startY: 115,
+    startY: 135,
     head: [["Item", "Qty", "Rate", "Amount"]],
     body: tableRows,
-    theme: "grid",
+    theme: "striped",
     headStyles: {
-      fillColor: [15, 118, 110],
+      fillColor: PRIMARY,
       textColor: 255,
       fontStyle: "bold",
+      halign: "center",
     },
     styles: {
-      fontSize: 9,
-      cellPadding: 4,
+      fontSize: 10,
+      cellPadding: 5,
     },
     columnStyles: {
       1: { halign: "center" },
@@ -111,21 +119,26 @@ export const generateReceipt = (service) => {
     },
   })
 
-  /* ---------- Totals ---------- */
-  const y = doc.lastAutoTable.finalY + 10
+  /* ---------- TOTAL BOX ---------- */
+  const y = doc.lastAutoTable.finalY + 15
 
+  doc.setFillColor(...PRIMARY)
+  doc.roundedRect(110, y, 80, 18, 4, 4, "F")
+
+  doc.setFontSize(12)
   doc.setFont("helvetica", "bold")
-  doc.text("Total Amount", 120, y)
-  doc.text(`Rs.${service.totals?.final || 0} /-`, 190, y, { align: "right" })
+  doc.setTextColor(255)
+  doc.text("TOTAL AMOUNT", 115, y + 11)
+  doc.text(`Rs. ${service.totals?.final  || 0} /-`, 185, y + 11, { align: "right" })
 
   /* ---------- Footer ---------- */
-  doc.setFontSize(8)
+  doc.setFontSize(9)
   doc.setFont("helvetica", "italic")
-  doc.setTextColor(120)
+  doc.setTextColor(100)
   doc.text(
-    "Thank you for choosing Mate Tractor. This is a system-generated receipt.",
+    "Thank you for choosing Mate Tractor • This is a system-generated receipt",
     105,
-    285,
+    280,
     { align: "center" }
   )
 
@@ -170,12 +183,12 @@ export const exportToPDF = (services = []) => {
 
   autoTable(doc, {
     startY: 25,
-    head: [["Order", "Customer", "Tractor", "Completed", "Total"]],
+    head: [["Order", "Customer", "Tractor", "Order Date", "Total"]],
     body: services.map(s => [
       s.orderNumber || s._id,
       s.customerId?.name,
       `${s.tractor?.name} ${s.tractor?.model}`,
-      formatDate(s.completedAt),
+      formatDate(s.createdAt),
       `Rs.${s.totals?.final || 0} /-`,
     ]),
     theme: "grid",
