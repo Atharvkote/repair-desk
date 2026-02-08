@@ -1,4 +1,5 @@
 import Part from "../models/parts-catalog.model.js";
+import logger from "../utils/logger.js";
 
 export const createPart = async (req, res) => {
   try {
@@ -54,6 +55,8 @@ export const getParts = async (req, res) => {
       filter.status = status;
     }
 
+    logger.info("[PART] Fetching parts from database", { status });
+
     const parts = await Part.find(filter).sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -61,6 +64,7 @@ export const getParts = async (req, res) => {
       items: parts,
     });
   } catch (error) {
+    logger.error(`[PART] Error fetching parts: ${error.message}`);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -71,6 +75,9 @@ export const getParts = async (req, res) => {
 export const getPartById = async (req, res) => {
   try {
     const { id } = req.params;
+    
+    logger.info(`[PART] Fetching part ${id} from database`);
+    
     const part = await Part.findById(id);
 
     if (!part) {
@@ -85,6 +92,7 @@ export const getPartById = async (req, res) => {
       data: part,
     });
   } catch (error) {
+    logger.error(`[PART] Error fetching part by ID: ${error.message}`);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -144,6 +152,17 @@ export const updatePart = async (req, res) => {
 
 export const deletePart = async (req, res) => {
   try {
+    console.log(req.user);
+    if (req.user?.role !== "SUPER_ADMIN") {
+      logger.warn(
+        `Delete part: User ${req.user?.id} with role ${req.user?.role} attempted to delete part (requires SUPER_ADMIN)`
+      );
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden: Only SUPER_ADMIN can delete parts",
+      });
+    }
+
     const { id } = req.params;
     const part = await Part.findByIdAndDelete(id);
 
@@ -154,11 +173,14 @@ export const deletePart = async (req, res) => {
       });
     }
 
+    logger.info(`Part ${id} deleted by SUPER_ADMIN ${req.user.id}`);
+
     res.status(200).json({
       success: true,
       message: "Part deleted successfully",
     });
   } catch (error) {
+    logger.error(`Error deleting part: ${error.message}`);
     res.status(500).json({
       success: false,
       message: error.message,

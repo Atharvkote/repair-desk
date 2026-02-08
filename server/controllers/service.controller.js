@@ -1,4 +1,5 @@
 import Service from "../models/service-catalog.model.js";
+import logger from "../utils/logger.js";
 
 export const createService = async (req, res) => {
   try {
@@ -51,6 +52,8 @@ export const getServices = async (req, res) => {
       filter.status = status;
     }
 
+    logger.info("[SERVICE] Fetching services from database", { status });
+
     const services = await Service.find(filter).sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -58,6 +61,7 @@ export const getServices = async (req, res) => {
       items: services,
     });
   } catch (error) {
+    logger.error(`[SERVICE] Error fetching services: ${error.message}`);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -68,6 +72,9 @@ export const getServices = async (req, res) => {
 export const getServiceById = async (req, res) => {
   try {
     const { id } = req.params;
+    
+    logger.info(`[SERVICE] Fetching service ${id} from database`);
+    
     const service = await Service.findById(id);
 
     if (!service) {
@@ -82,6 +89,7 @@ export const getServiceById = async (req, res) => {
       data: service,
     });
   } catch (error) {
+    logger.error(`[SERVICE] Error fetching service by ID: ${error.message}`);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -131,6 +139,17 @@ export const updateService = async (req, res) => {
 
 export const deleteService = async (req, res) => {
   try {
+    // RBAC: Only SUPER_ADMIN can delete services
+    if (req.user?.role !== "SUPER_ADMIN") {
+      logger.warn(
+        `Delete service: User ${req.user?.id} with role ${req.user?.role} attempted to delete service (requires SUPER_ADMIN)`
+      );
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden: Only SUPER_ADMIN can delete services",
+      });
+    }
+
     const { id } = req.params;
     const service = await Service.findByIdAndDelete(id);
 
@@ -141,11 +160,14 @@ export const deleteService = async (req, res) => {
       });
     }
 
+    logger.info(`Service ${id} deleted by SUPER_ADMIN ${req.user.id}`);
+
     res.status(200).json({
       success: true,
       message: "Service deleted successfully",
     });
   } catch (error) {
+    logger.error(`Error deleting service: ${error.message}`);
     res.status(500).json({
       success: false,
       message: error.message,

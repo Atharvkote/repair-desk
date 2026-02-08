@@ -14,6 +14,7 @@ import {
   startOrder,
   completeOrder,
   cancelOrder,
+  deleteOrder,
   getOrderById,
   getOrders,
 } from "../controllers/service-order.controller.js";
@@ -37,5 +38,6 @@ router.patch("/:orderId/discount", updateOrderDiscount);
 router.post("/:orderId/start", startOrder);
 router.post("/:orderId/complete", completeOrder);
 router.post("/:orderId/cancel", cancelOrder);
+router.delete("/:orderId", deleteOrder);
 
 export default router;

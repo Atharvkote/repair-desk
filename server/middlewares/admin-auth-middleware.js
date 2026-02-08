@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { publicKey } from "../configs/jwt.js";
+import { publicKey } from "../configs/jwt.config.js";
 import logger from "../utils/logger.js";
 
 export const adminAuthMiddleware = (req, res, next) => {

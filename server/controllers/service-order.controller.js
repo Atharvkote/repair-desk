@@ -576,6 +576,53 @@ export const cancelOrder = async (req, res) => {
   }
 };
 
+export const deleteOrder = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+
+    const order = await ServiceOrder.findById(orderId);
+    
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    // // Only allow deletion of DRAFT or CANCELLED orders
+    // if (order.status !== "DRAFT" && order.status !== "CANCELLED") {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: `Cannot delete order with status ${order.status}. Only DRAFT or CANCELLED orders can be deleted.`,
+    //   });
+    // }
+
+    // // Restore stock if order is CANCELLED and has parts
+    // if (order.status === "CANCELLED") {
+    //   for (const item of order.items) {
+    //     if (item.itemType === "PART") {
+    //       await Part.findByIdAndUpdate(item.partId, {
+    //         $inc: { stock: item.quantity },
+    //       });
+    //     }
+    //   }
+    // }
+
+    await ServiceOrder.findByIdAndDelete(orderId);
+
+    emitOrderUpdate(orderId, "order:deleted", null);
+    res.status(200).json({
+      success: true,
+      message: "Order deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 export const getOrderById = async (req, res) => {
   try {
     const { orderId } = req.params;

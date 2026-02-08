@@ -7,6 +7,8 @@ import {
   getAdmins,
   loginAdmin,
   updateAdmin,
+  refreshToken,
+  getUserDetails,
 } from "../controllers/admin.controller.js";
 import { adminAuthMiddleware } from "../middlewares/admin-auth-middleware.js";
 
@@ -17,8 +19,10 @@ router.post("/login", loginAdmin);
 
 router.get("/", adminAuthMiddleware, getAdmins);
 router.get("/me", adminAuthMiddleware, getAdmin);
+router.get("/user/:id", adminAuthMiddleware, getUserDetails);
 
 router.get("/check-auth", adminAuthMiddleware, checkAuth);
+router.post("/refresh", refreshToken);
 router.patch("/:id", adminAuthMiddleware, updateAdmin);
 router.delete("/:id", adminAuthMiddleware, deleteAdmin);
 

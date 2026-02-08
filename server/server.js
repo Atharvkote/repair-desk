@@ -7,7 +7,7 @@
  * Key features:
  * - Express with security (helmet, cors), rate limiting (rate-limiter-flexible + rate-limit-redis)
  * - MongoDB connection via Mongoose
- * - Redis for rate limiting and Socket.IO
+ * - Redis for rate limiting and Socket.IO (caching removed)
  * - Socket.IO server with Redis adapter
  * - Routes for APIs (placeholders)
  * - Graceful shutdown on SIGINT / SIGTERM
@@ -89,7 +89,6 @@ try {
 if (!redisClient) {
   redisLogger.warn("Redis client not available - some features may be limited");
 } else {
-  // Test Redis connection
   redisClient
     .ping()
     .then(() => {
@@ -257,11 +256,13 @@ import customerRouter from "./routers/customer.routes.js";
 import serviceRouter from "./routers/service.routes.js";
 import partRouter from "./routers/part.routes.js";
 import serviceOrderRouter from "./routers/service-order.routes.js";
+import dataRouter from "./routers/data.routes.js";
 
 app.use("/api/customers", customerRouter);
 app.use("/api/services", serviceRouter);
 app.use("/api/parts", partRouter);
 app.use("/api/orders", serviceOrderRouter);
+app.use("/api/data", dataRouter);
 
 
 // Global error handler middleware (must be after all routes)
