@@ -59,15 +59,12 @@ const loginAdmin = async (req, res) => {
     const admin = await adminModel
       .findOne({ phone: phone })
       .select("+password");
-    // console.log("[DEBUG] loginAdmin - queried phone:", phone);
-    // console.log("[DEBUG] loginAdmin - admin found:", admin ? { _id: admin._id, phone: admin.phone, hasPassword: !!admin.password } : null);
     if (!admin) {
       return res
         .status(404)
         .json({ success: false, message: "Admin not found" });
     }
     const isPasswordValid = await admin.comparePassword(password);
-    // console.log("[DEBUG] loginAdmin - password comparison result:", isPasswordValid);
     if (!isPasswordValid) {
       return res
         .status(401)

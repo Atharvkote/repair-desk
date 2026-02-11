@@ -390,7 +390,8 @@ export const updateItemDiscount = async (req, res) => {
     }
 
     const order = await ServiceOrder.findById(orderId);
-    validateOrderStatus(order, ["DRAFT"], "update item discount");
+    // Allow discount updates while order is DRAFT or ONGOING
+    validateOrderStatus(order, ["DRAFT", "ONGOING"], "update item discount");
 
     const itemIndex = parseInt(index);
     if (itemIndex < 0 || itemIndex >= order.items.length) {
@@ -807,7 +808,8 @@ export const removeItem = async (req, res) => {
     const { orderId, itemId } = req.params;
 
     const order = await ServiceOrder.findById(orderId);
-    validateOrderStatus(order, ["DRAFT"], "remove item");
+    // Allow removing items while order is still in progress (before completion/cancellation)
+    validateOrderStatus(order, ["DRAFT", "ONGOING"], "remove item");
 
     const itemIndex = order.items.findIndex((item) => {
       if (item.itemType === "SERVICE") {
@@ -822,6 +824,22 @@ export const removeItem = async (req, res) => {
         success: false,
         message: "Item not found in order",
       });
+    }
+
+    const item = order.items[itemIndex];
+
+    // If order is already started and item is a PART, restore stock for the removed quantity
+    if (order.status === "ONGOING" && item.itemType === "PART" && item.partId) {
+      try {
+        await Part.findByIdAndUpdate(item.partId, {
+          $inc: { stock: item.quantity },
+        });
+      } catch (e) {
+        return res.status(500).json({
+          success: false,
+          message: "Failed to restore part stock while removing item",
+        });
+      }
     }
 
     order.items.splice(itemIndex, 1);
@@ -845,7 +863,7 @@ export const removeItem = async (req, res) => {
 export const updateItemQuantity = async (req, res) => {
   try {
     const { orderId, itemId } = req.params;
-    const { quantity } = req.body;
+    const { quantity, unitPrice, name } = req.body;
 
     if (!quantity || quantity <= 0) {
       return res.status(400).json({
@@ -855,7 +873,8 @@ export const updateItemQuantity = async (req, res) => {
     }
 
     const order = await ServiceOrder.findById(orderId);
-    validateOrderStatus(order, ["DRAFT"], "update item quantity");
+    // Allow quantity updates while order is DRAFT or ONGOING
+    validateOrderStatus(order, ["DRAFT", "ONGOING"], "update item quantity");
 
     const itemIndex = order.items.findIndex((item) => {
       if (item.itemType === "SERVICE") {
@@ -874,6 +893,7 @@ export const updateItemQuantity = async (req, res) => {
 
     const item = order.items[itemIndex];
 
+    // For PART items on ONGOING orders, adjust stock based on quantity delta
     if (item.itemType === "PART") {
       const part = await Part.findById(item.partId);
       if (!part) {
@@ -882,12 +902,54 @@ export const updateItemQuantity = async (req, res) => {
           message: "Part not found",
         });
       }
-      if (part.stock < quantity) {
+
+      const previousQty = item.quantity;
+      const delta = quantity - previousQty;
+
+      if (order.status === "ONGOING" && delta !== 0) {
+        // If increasing quantity, ensure additional stock is available
+        if (delta > 0 && part.stock < delta) {
+          return res.status(400).json({
+            success: false,
+            message: `Insufficient stock. Available: ${part.stock}, Requested additional: ${delta}`,
+          });
+        }
+
+        try {
+          // Decrease stock for additional quantity, increase for reduction
+          await Part.findByIdAndUpdate(item.partId, {
+            $inc: { stock: -delta },
+          });
+        } catch (e) {
+          return res.status(500).json({
+            success: false,
+            message: "Failed to update part stock for quantity change",
+          });
+        }
+      } else if (order.status === "DRAFT") {
+        // For draft orders, just validate total required stock without adjusting yet.
+        if (part.stock < quantity) {
+          return res.status(400).json({
+            success: false,
+            message: `Insufficient stock. Available: ${part.stock}, Requested: ${quantity}`,
+          });
+        }
+      }
+    }
+
+    // Optional updates to item pricing and name
+    if (unitPrice !== undefined) {
+      if (unitPrice < 0) {
         return res.status(400).json({
           success: false,
-          message: `Insufficient stock. Available: ${part.stock}, Requested: ${quantity}`,
+          message: "Unit price must be non-negative",
         });
       }
+      order.items[itemIndex].unitPrice = unitPrice;
+    }
+
+    if (typeof name === "string" && name.trim().length > 0) {
+      order.items[itemIndex].name = name.trim();
     }
 
     order.items[itemIndex].quantity = quantity;
@@ -921,7 +983,8 @@ export const updateItemDiscountById = async (req, res) => {
     }
 
     const order = await ServiceOrder.findById(orderId);
-    validateOrderStatus(order, ["DRAFT"], "update item discount");
+    // Allow discount updates while order is DRAFT or ONGOING
+    validateOrderStatus(order, ["DRAFT", "ONGOING"], "update item discount");
 
     const itemIndex = order.items.findIndex((item) => {
       if (item.itemType === "SERVICE") {

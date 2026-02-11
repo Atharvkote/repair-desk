@@ -97,11 +97,18 @@ export const orderService = {
   updateItemQuantity: async (
     orderId: string,
     itemId: string,
-    quantity: number
+    quantity: number,
+    unitPrice?: number,
+    name?: string
   ): Promise<Order> => {
-    const response = await api.patch<Order>(`/orders/${orderId}/items/${itemId}`, {
-      quantity,
-    })
+    const body: any = { quantity }
+    if (typeof unitPrice === 'number') {
+      body.unitPrice = unitPrice
+    }
+    if (typeof name === 'string') {
+      body.name = name
+    }
+    const response = await api.patch<Order>(`/orders/${orderId}/items/${itemId}`, body)
     return response.data
   },
 

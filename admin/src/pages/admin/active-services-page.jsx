@@ -11,6 +11,8 @@ import { toast } from "sonner"
 import { orderService } from "@/services/order.service"
 import Loader from "@/components/shared/loader"
 import Header from "@/components/shared/sytle-header"
+import { Edit } from "lucide-react"
+import EditServicePage from "./edit-services-page"
 
 const STATUS_COLORS = {
   "ONGOING": "bg-teal-50 text-teal-700 border-teal-200",
@@ -30,6 +32,8 @@ export default function ActiveServices() {
   const [expandedRow, setExpandedRow] = useState(null)
   const [services, setServices] = useState([])
   const [loading, setLoading] = useState(true)
+  const [isEditorOn, setisEditorOn] = useState(false);
+  const [serviceToEdit, setServiceToEdit] = useState(null);
 
   useEffect(() => {
     fetchServices()
@@ -39,7 +43,6 @@ export default function ActiveServices() {
     try {
       setLoading(true)
       const response = await orderService.getOngoingOrders()
-      // console.log("Fetched services:", response.data)
       setServices(response.data)
     } catch (error) {
       console.error("Error fetching services:", error)
@@ -74,12 +77,8 @@ export default function ActiveServices() {
     items?.filter(item => item.itemType === "PART")
 
   const handleEdit = (service) => {
-    navigate("/service", {
-      state: {
-        editMode: true,
-        orderId: service._id, 
-      },
-    })
+    setServiceToEdit(service);
+    setisEditorOn(true);
   }
 
   const handleDelete = async (service) => {
@@ -338,8 +337,8 @@ export default function ActiveServices() {
                                                 </span>
                                                 {svc.serviceId?.status && (
                                                   <span className={`ml-2 font-medium ${svc.serviceId.status === "AVAILABLE"
-                                                      ? "text-green-500"
-                                                      : "text-red-500"
+                                                    ? "text-green-500"
+                                                    : "text-red-500"
                                                     }`}>
                                                     • {svc.serviceId.status}
                                                   </span>
@@ -449,6 +448,19 @@ export default function ActiveServices() {
           </div>
         )}
       </div>
+
+
+      {isEditorOn &&
+        serviceToEdit && (
+          <EditServicePage
+            orderData={serviceToEdit}
+            onClose={() => {
+              setisEditorOn(false)
+              fetchServices()
+            }}
+          />
+        )}
+
     </div>
   )
 }

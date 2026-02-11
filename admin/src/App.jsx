@@ -75,8 +75,6 @@ const AppRoutes = () => {
 
 const App = () => {
   const { isLoading } = useAdminAuth();
-  const NoNavbarRoutes = [];
-  const NoFooterRoutes = [];
   const pathname = useLocation().pathname;
   const isAdminRoute = pathname.startsWith('/admin');
 
