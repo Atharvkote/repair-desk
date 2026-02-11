@@ -117,7 +117,7 @@ function Footer() {
           </div>
 
           <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">
-           {new Date().getFullYear()} Copyright. All rights reserved. @Team BYPASS
+           {new Date().getFullYear()} Copyright. All rights reserved. @Team BYPAS@07
           </p>
 
         </div>
