@@ -233,7 +233,7 @@ export const addServiceItem = async (req, res) => {
     }
 
     const order = await ServiceOrder.findById(orderId);
-    validateOrderStatus(order, ["DRAFT"], "add service");
+    validateOrderStatus(order, ["DRAFT","ONGOING"], "add service");
 
     const service = await Service.findOne({
       $or: [{ _id: serviceId }, { serviceCode: serviceId }],
@@ -298,7 +298,7 @@ export const addPartItem = async (req, res) => {
     }
 
     const order = await ServiceOrder.findById(orderId);
-    validateOrderStatus(order, ["DRAFT"], "add part");
+    validateOrderStatus(order, ["DRAFT","ONGOING"], "add part");
 
     const part = await Part.findOne({
       $or: [{ _id: partId }, { partCode: partId }],
@@ -434,7 +434,7 @@ export const updateOrderDiscount = async (req, res) => {
     }
 
     const order = await ServiceOrder.findById(orderId);
-    validateOrderStatus(order, ["DRAFT"], "update order discount");
+    validateOrderStatus(order, ["DRAFT", "ONGOING"], "update order discount");
 
     order.orderDiscount = {
       type: discount > 0 ? "FLAT" : "NONE",
@@ -705,7 +705,7 @@ export const addItem = async (req, res) => {
     }
 
     const order = await ServiceOrder.findById(orderId);
-    validateOrderStatus(order, ["DRAFT"], "add item");
+    validateOrderStatus(order, ["DRAFT", "ONGOING"], "add item");
 
     if (type === "service") {
       const service = await Service.findOne({

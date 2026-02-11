@@ -236,7 +236,6 @@ export default function ServiceFormPage(): JSX.Element {
   // Load order data when in edit mode
   useEffect(() => {
     const loadOrderForEdit = async () => {
-      console.log("locationState", locationState);
       const orderId = locationState?.orderId || locationState?.serviceData?.orderId || locationState?.serviceData?._id
       
       if (locationState?.editMode && orderId) {
@@ -246,7 +245,6 @@ export default function ServiceFormPage(): JSX.Element {
           // Fetch the full order from API
           const orderResponse = await orderService.getOrder(orderId)
           const order = orderResponse.data || orderResponse
-          console.log("order", order)
 
           // Set customer
           if (order.customerId) {

@@ -69,7 +69,6 @@ export default function ActiveServices() {
       )
     })
   }, [searchQuery, services])
-
   const getServices = (items = []) =>
     items?.filter(item => item.itemType === "SERVICE")
 
@@ -292,7 +291,7 @@ export default function ActiveServices() {
                                         {t("activeServices.phone")}
                                       </div>
                                       <div className="text-sm font-bold text-slate-900 mt-1">
-                                        {service.customerId?.phone}
+                                       +91 {service.customerId?.phone}
                                       </div>
                                     </div>
                                   </div>
@@ -335,14 +334,7 @@ export default function ActiveServices() {
                                                 <span className="text-slate-500">
                                                   {t("activeServices.qty")}: {svc.quantity}
                                                 </span>
-                                                {svc.serviceId?.status && (
-                                                  <span className={`ml-2 font-medium ${svc.serviceId.status === "AVAILABLE"
-                                                    ? "text-green-500"
-                                                    : "text-red-500"
-                                                    }`}>
-                                                    • {svc.serviceId.status}
-                                                  </span>
-                                                )}
+                                               
                                               </div>
                                             </div>
                                             <div className="text-sm font-bold text-teal-600">
@@ -382,7 +374,7 @@ export default function ActiveServices() {
                                           <div key={part.partId?._id} className="px-5 py-3 flex items-center justify-between">
                                             <div className="flex-1">
                                               <div className="text-sm font-semibold text-slate-900">
-                                                {part.partId?.title || part.partId?.name || part.name}
+                                                {part.partId?.title || part.partId?.name || part.name || part.title}
                                               </div>
                                               <div className="text-xs text-slate-500 mt-0.5">
                                                 {t("activeServices.qty")}: {part.quantity}

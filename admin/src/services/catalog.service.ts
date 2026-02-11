@@ -10,7 +10,7 @@ export interface ApiResponse<T> {
 
 
 export interface ServiceItem {
-  id: string
+  _id: string
   serviceCode: string
   name: string
   description?: string

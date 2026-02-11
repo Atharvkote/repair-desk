@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { User, Package, Percent, Plus, Trash2, X } from 'lucide-react'
+import { User, Package, Percent, Plus, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import ToggleTabs from '@/components/customs/toggle-tabs'
@@ -10,6 +10,8 @@ import { orderService } from '@/services/order.service'
 import Header from '@/components/shared/sytle-header'
 import { FaPencil } from 'react-icons/fa6'
 import { FaTrash } from 'react-icons/fa'
+import { catalogService, isAvailable, type PartItem, type ServiceItem } from '@/services/catalog.service'
+import api from '@/lib/api'
 
 interface OrderItem {
   _id?: string
@@ -48,10 +50,40 @@ export default function EditServiceOrder({ orderData, onClose }: EditServiceOrde
   const [activeTab, setActiveTab] = useState('customer')
   const [editData, setEditData] = useState<OrderData>(orderData)
   const [isSaving, setIsSaving] = useState(false)
+  const [servicesCatalog, setServicesCatalog] = useState<ServiceItem[]>([])
+  const [partsCatalog, setPartsCatalog] = useState<PartItem[]>([])
+  const [isLoadingCatalog, setIsLoadingCatalog] = useState(false)
+  const [isAddServiceOpen, setIsAddServiceOpen] = useState(false)
+  const [isAddPartOpen, setIsAddPartOpen] = useState(false)
+  const [selectedServiceId, setSelectedServiceId] = useState<string>('')
+  const [selectedPartId, setSelectedPartId] = useState<string>('')
+  const [newServiceQty, setNewServiceQty] = useState<number>(1)
+  const [newPartQty, setNewPartQty] = useState<number>(1)
 
   const handleTabChange = (tabId: string) => {
     setActiveTab(tabId)
   }
+
+  // Load catalogs for services and parts (for adding new items)
+  useEffect(() => {
+    const loadCatalogs = async () => {
+      try {
+        setIsLoadingCatalog(true)
+        const [services, parts] = await Promise.all([
+          catalogService.getServices(),
+          catalogService.getParts(),
+        ])
+        setServicesCatalog(services)
+        setPartsCatalog(parts)
+      } catch (error: any) {
+        const message = error?.response?.data?.message ?? 'Failed to load catalog items'
+        toast.error(message)
+      } finally {
+        setIsLoadingCatalog(false)
+      }
+    }
+    loadCatalogs()
+  }, [])
 
   // Keep local editData in sync with incoming orderData when opening editor
   useEffect(() => {
@@ -130,20 +162,7 @@ export default function EditServiceOrder({ orderData, onClose }: EditServiceOrde
   }
 
   // Add new item
-  const addNewItem = (itemType: 'SERVICE' | 'PART') => {
-    const newItem: OrderItem = {
-      itemType,
-      name: `New ${itemType}`,
-      quantity: 1,
-      unitPrice: 0,
-      itemDiscount: 0,
-      amountDiscount: 0,
-    }
-    setEditData({
-      ...editData,
-      items: [...editData.items, newItem],
-    })
-  }
+  // (Creation of new items is done via catalog selection + backend add; see handlers below.)
 
   // Helper to compute a stable key for matching items between original and edited arrays
   const getItemKey = (item: OrderItem) => {
@@ -172,18 +191,6 @@ export default function EditServiceOrder({ orderData, onClose }: EditServiceOrde
     try {
       setIsSaving(true)
       const orderId = editData._id
-
-      // Disallow saving when there are newly added items without linked catalog IDs
-      const hasItemsWithoutId = editData.items.some((item) => {
-        const key = getItemKey(item)
-        return !key.id
-      })
-
-      if (hasItemsWithoutId) {
-        toast.error('Adding new services or parts is not supported from this edit screen. Please use the create flow.')
-        setIsSaving(false)
-        return
-      }
 
       // 1. Build edited map
       const editedMap = new Map<string, { index: number; item: OrderItem }>()
@@ -348,13 +355,105 @@ export default function EditServiceOrder({ orderData, onClose }: EditServiceOrde
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-slate-900">Services</h2>
                 <Button
-                  onClick={() => addNewItem('SERVICE')}
+                  onClick={() => setIsAddServiceOpen(true)}
                   className="bg-teal-600 hover:bg-teal-700 text-white rounded-xl flex items-center gap-2"
                 >
                   <Plus className="w-4 h-4" />
                   Add Service
                 </Button>
               </div>
+              {isAddServiceOpen && (
+                <div className="mb-6 flex flex-wrap items-center gap-3 bg-slate-50 border border-slate-200 rounded-xl p-4">
+                  <span className="text-sm font-semibold text-slate-700">Add service from catalog:</span>
+                  <select
+                    className="min-w-[200px] px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white"
+                    value={selectedServiceId}
+                    onChange={(e) => setSelectedServiceId(e.target.value)}
+                    disabled={isLoadingCatalog}
+                  >
+                    <option value="">Select service</option>
+                    {servicesCatalog.map((svc) => (
+                      <option key={svc._id} value={svc._id}>
+                      {svc.title ? svc.title : svc.name} — ₹{svc.price}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="number"
+                    min={1}
+                    className="w-24 px-3 py-2 border border-slate-300 rounded-lg text-sm"
+                    value={newServiceQty}
+                    onChange={(e) => setNewServiceQty(Number(e.target.value) || 1)}
+                    disabled={isLoadingCatalog}
+                  />
+                  <Button
+                    disabled={isLoadingCatalog}
+                    className="bg-teal-600 hover:bg-teal-700 text-white rounded-xl"
+                    onClick={async () => {
+                      if (!selectedServiceId) {
+                        toast.error('Please select a service from catalog')
+                        return
+                      }
+                      if (newServiceQty <= 0) {
+                        toast.error('Quantity must be greater than zero')
+                        return
+                      }
+                      try {
+                        await api.post(`/orders/${editData._id}/items`, {
+                          itemId: selectedServiceId,
+                          quantity: newServiceQty,
+                          type: 'service',
+                        })
+                        const svc = servicesCatalog.find((s) => s._id === selectedServiceId)
+                        if (svc) {
+                          const subtotal = svc.price * newServiceQty
+                          setEditData((prev) => ({
+                            ...prev,
+                            items: [
+                              ...prev.items,
+                              {
+                                itemType: 'SERVICE',
+                                name: svc.name,
+                                quantity: newServiceQty,
+                                unitPrice: svc.price,
+                                itemDiscount: 0,
+                                amountDiscount: 0,
+                                lineTotals: {
+                                  subtotal,
+                                  discount: 0,
+                                  final: subtotal,
+                                },
+                                serviceId: { _id: svc._id, name: svc.name },
+                              } as any,
+                            ],
+                          }))
+                        }
+                        setSelectedServiceId('')
+                        setNewServiceQty(1)
+                        setIsAddServiceOpen(false)
+                        toast.success('Service added to order')
+                      } catch (error: any) {
+                        const message = error?.response?.data?.message ?? 'Failed to add service to order'
+                        toast.error(message)
+                      }
+                    }}
+                  >
+                    Add
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="rounded-xl bg-red-600 text-white hover:bg-red-700 cursor-pointer"
+                    onClick={() => {
+                      setIsAddServiceOpen(false)
+                      setSelectedServiceId('')
+                      setNewServiceQty(1)
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              )}
               {editData.items.filter((item) => item.itemType === 'SERVICE').length === 0 ? (
                 <div className="text-center py-12 bg-slate-50 rounded-xl border border-slate-200">
                   <Package className="w-12 h-12 text-slate-300 mx-auto mb-3" />
@@ -387,7 +486,7 @@ export default function EditServiceOrder({ orderData, onClose }: EditServiceOrde
                               <td className="px-6 py-4">
                                 <input
                                   type="text"
-                                  value={item.name || ''}
+                                  value={item.name || item.title || ""}
                                   onChange={(e) => updateItemField(itemIndex, 'name', e.target.value)}
                                   className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
                                   placeholder="Service name"
@@ -459,13 +558,107 @@ export default function EditServiceOrder({ orderData, onClose }: EditServiceOrde
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-slate-900">Parts</h2>
                 <Button
-                  onClick={() => addNewItem('PART')}
+                  onClick={() => setIsAddPartOpen(true)}
                   className="bg-teal-600 hover:bg-teal-700 text-white rounded-xl flex items-center gap-2"
                 >
                   <Plus className="w-4 h-4" />
                   Add Part
                 </Button>
               </div>
+              {isAddPartOpen && (
+                <div className="mb-6 flex flex-wrap items-center gap-3 bg-slate-50 border border-slate-200 rounded-xl p-4">
+                  <span className="text-sm font-semibold text-slate-700">Add part from catalog:</span>
+                  <select
+                    className="min-w-[200px] px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white"
+                    value={selectedPartId}
+                    onChange={(e) => setSelectedPartId(e.target.value)}
+                    disabled={isLoadingCatalog}
+                  >
+                    <option value="">Select part</option>
+                    {partsCatalog.map((part) => (
+                      <option key={part._id} value={part._id}>
+                        {part.title ? part.title : part.name} — ₹{part.price} ({part.stock ?? 0} in stock)
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="number"
+                    min={1}
+                    className="w-24 px-3 py-2 border border-slate-300 rounded-lg text-sm"
+                    value={newPartQty}
+                    onChange={(e) => setNewPartQty(Number(e.target.value) || 1)}
+                    disabled={isLoadingCatalog}
+                  />
+                  <Button
+                    disabled={isLoadingCatalog}
+                    className="bg-teal-600 hover:bg-teal-700 text-white rounded-xl"
+                    onClick={async () => {
+                      if (!selectedPartId) {
+                        toast.error('Please select a part from catalog')
+                        return
+                      }
+                      if (newPartQty <= 0) {
+                        toast.error('Quantity must be greater than zero')
+                        return
+                      }
+                      try {
+                        await api.post(`/orders/${editData._id}/items`, {
+                          itemId: selectedPartId,
+                          quantity: newPartQty,
+                          type: 'part',
+                        })
+                        const part = partsCatalog.find((p) => p._id === selectedPartId)
+                        if (part) {
+                          const subtotal = part.price * newPartQty
+                          setEditData((prev) => ({
+                            ...prev,
+                            items: [
+                              ...prev.items,
+                              {
+                                itemType: 'PART',
+                                name: part.name,
+                                quantity: newPartQty,
+                                unitPrice: part.price,
+                                itemDiscount: 0,
+                                amountDiscount: 0,
+                                lineTotals: {
+                                  subtotal,
+                                  discount: 0,
+                                  final: subtotal,
+                                },
+                                partId: { _id: part.id, name: part.name },
+                              } as any,
+                            ],
+                          }))
+                        }else{
+                          toast.error('Selected part not found in catalog')
+                        }
+                        setSelectedPartId('')
+                        setNewPartQty(1)
+                        setIsAddPartOpen(false)
+                        toast.success('Part added to order')
+                      } catch (error: any) {
+                        const message = error?.response?.data?.message ?? 'Failed to add part to order'
+                        toast.error(message)
+                      }
+                    }}
+                  >
+                    Add
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="rounded-xl text-white bg-red-600 hover:bg-red-700 cursor-pointer"
+                    onClick={() => {
+                      setIsAddPartOpen(false)
+                      setSelectedPartId('')
+                      setNewPartQty(1)
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              )}
               {editData.items.filter((item) => item.itemType === 'PART').length === 0 ? (
                 <div className="text-center py-12 bg-slate-50 rounded-xl border border-slate-200">
                   <Package className="w-12 h-12 text-slate-300 mx-auto mb-3" />
@@ -498,7 +691,7 @@ export default function EditServiceOrder({ orderData, onClose }: EditServiceOrde
                               <td className="px-6 py-4">
                                 <input
                                   type="text"
-                                  value={item.name || ''}
+                                  value={item.title ? item.title : item.name}
                                   onChange={(e) => updateItemField(itemIndex, 'name', e.target.value)}
                                   className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
                                   placeholder="Part name"

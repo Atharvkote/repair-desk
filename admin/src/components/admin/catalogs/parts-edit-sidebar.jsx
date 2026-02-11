@@ -19,7 +19,6 @@ export function PartsEditSidebar({ part, open, onClose, onSave }) {
           try {
             setIsLoading(true)
             const fullPart = await catalogService.getPartById(part._id)
-            console.log(fullPart)
             setFormData({
               name: fullPart.name || "",
               description: fullPart.description || "",
@@ -53,7 +52,6 @@ export function PartsEditSidebar({ part, open, onClose, onSave }) {
 
   const handleSave = async () => {
     if (!formData.name.trim() || formData.price === "" || formData.stock === "") {
-      console.log(formData);
       toast.error("Part name, price, and stock are required")
       return
     }
@@ -73,7 +71,6 @@ export function PartsEditSidebar({ part, open, onClose, onSave }) {
 
     setIsSaving(true)
     try {
-      console.log("id",part._id)
       const updatedPart = await catalogService.updatePart(part._id || part.id, {
         name: formData.name.trim(),
         description: formData.description?.trim() || "",

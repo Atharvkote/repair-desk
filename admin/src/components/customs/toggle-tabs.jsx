@@ -13,9 +13,10 @@ export default function ToggleTabs({ options, defaultActive, onChange, className
     }
   }, [defaultActive])
 
-  const handleChange = (label) => {
-    setActiveTab(label)
-    onChange?.(label)
+
+  const handleChange = (id) => {
+    setActiveTab(id)
+    onChange?.(id)
   }
 
   return (
@@ -43,7 +44,7 @@ export default function ToggleTabs({ options, defaultActive, onChange, className
             >
               {option.icon}
             </span>
-            {option.label}
+            {option?.label?.charAt(0).toUpperCase() + option?.label.slice(1)}
           </span>
         </button>
       ))}

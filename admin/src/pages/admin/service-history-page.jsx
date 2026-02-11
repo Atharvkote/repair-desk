@@ -33,7 +33,6 @@ export default function ServiceHistory() {
         try {
             setLoading(true)
             const response = await orderService.getCompletedOrders()
-            // console.log("Fetched completed services:", response.data)
             setServices(response.data)
         } catch (error) {
             console.error("Error fetching services:", error)

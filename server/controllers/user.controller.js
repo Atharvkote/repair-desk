@@ -72,10 +72,7 @@ import User from "../models/user.model.js";
   }
 };
 
-/**
- * @desc Login user
- * @route POST /api/users/login
- */
+
 const loginUser = async (req, res) => {
   try {
     const { phone, password } = req.body;
