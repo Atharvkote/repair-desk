@@ -1,0 +1,72 @@
+name: docker-build
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout code
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Login to Docker Hub
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # ---------- BACKEND ----------
+      - name: Build & Push Backend
+        uses: docker/build-push-action@v4
+        with:
+          context: ./server
+          file: ./server/dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/repair-desk-api-server:latest
+
+      - name: Trivy Scan Backend Image
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          image-ref: ${{ secrets.DOCKERHUB_USERNAME }}/repair-desk-api-server:latest
+          severity: CRITICAL,HIGH
+          exit-code: 1
+          ignore-unfixed: true
+
+      # ---------- ADMIN ----------
+      - name: Build & Push Admin Panel
+        uses: docker/build-push-action@v4
+        with:
+          context: ./admin
+          file: ./admin/dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/repair-desk-admin-panel:latest
+
+      - name: Trivy Scan Admin Image
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          image-ref: ${{ secrets.DOCKERHUB_USERNAME }}/repair-desk-admin-panel:latest
+          severity: CRITICAL,HIGH
+          exit-code: 1
+          ignore-unfixed: true
+
+      # ---------- CLIENT ----------
+      - name: Build & Push Client
+        uses: docker/build-push-action@v4
+        with:
+          context: ./client
+          file: ./client/dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/repair-desk-client:latest
+
+      - name: Trivy Scan Client Image
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          image-ref: ${{ secrets.DOCKERHUB_USERNAME }}/repair-desk-client:latest
+          severity: CRITICAL,HIGH
+          exit-code: 1
+          ignore-unfixed: true
