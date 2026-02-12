@@ -1,0 +1,32 @@
+services:
+  redis:
+        image: redis:7.2
+        restart: unless-stopped
+        ports:
+            - "6379:6379" # Redis server
+        volumes:
+            - redis_data:/data
+            
+  prom-server:
+    image: prom/prometheus
+    container_name: prometheus-server
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus-config.yml:/etc/prometheus/prometheus.yml
+
+  grafana-client :
+      image : grafana/grafana-oss
+      ports : 
+        - 3000:3000
+      container_name : grafana-client
+  
+  loki :
+      image : grafana/loki
+      ports :
+          - 3100:3100
+      container_name: grafana-loki
+
+volumes:
+  redis_data:
+

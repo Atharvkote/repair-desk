@@ -32,6 +32,7 @@ import { RedisStore } from "rate-limit-redis";
 import { RateLimiterRedis } from "rate-limiter-flexible";
 import { Server } from "socket.io";
 import { createAdapter } from "@socket.io/redis-streams-adapter";
+import client from "prom-client";
 
 // Loggers
 import logger from "./utils/logger.js";
@@ -51,6 +52,8 @@ import { adminAuthMiddleware } from "./middlewares/admin-auth-middleware.js";
 const app = express();
 const SERVER_PORT = process.env.SERVER_PORT || 5000;
 const server = http.createServer(app);
+const collectDefaultMetrics = client.collectDefaultMetrics;
+collectDefaultMetrics({ register: client.register });
 
 server.keepAliveTimeout = 65000;
 server.headersTimeout = 66000;
@@ -136,6 +139,19 @@ app.use(
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   })
 );
+
+const httpRequestDurationSeconds = new client.Histogram({
+  name: 'http_request_duration_seconds',
+  help: 'Duration of HTTP requests in seconds',
+  labelNames: ['method', 'route', 'code'],
+  buckets: [0.05, 0.1, 0.2, 0.5, 1, 2, 5] // match your Apdex target/tolerated
+});
+
+const responseSizeBytes = new client.Counter({
+  name: 'http_response_size_bytes',
+  help: 'Total size of HTTP responses sent in bytes',
+  labelNames: ['method', 'route', 'code']
+});
 
 
 // Rate limiters (only if Redis is available)
@@ -223,6 +239,34 @@ if (redisClient) {
     logger.warn("Failed to create sensitive endpoints limiter:", error.message);
   }
 }
+
+app.use((req, res, next) => {
+  const end = httpRequestDurationSeconds.startTimer();
+  res.on('finish', () => {
+    end({ method: req.method, route: req.route?.path || req.path, code: res.statusCode });
+  });
+  next();
+});
+
+app.use((req, res, next) => {
+  const oldWrite = res.write;
+  const oldEnd = res.end;
+  let bytes = 0;
+
+  res.write = (...args) => {
+    if (args[0]) bytes += Buffer.byteLength(args[0]);
+    return oldWrite.apply(res, args);
+  };
+
+  res.end = (...args) => {
+    if (args[0]) bytes += Buffer.byteLength(args[0]);
+    responseSizeBytes.inc({ method: req.method, route: req.route?.path || req.path, code: res.statusCode }, bytes);
+    return oldEnd.apply(res, args);
+  };
+
+  next();
+});
+
 
 // Logging requests
 app.use((req, res, next) => {
