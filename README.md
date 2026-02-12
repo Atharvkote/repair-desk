@@ -1,8 +1,5 @@
 # Repair Desk 
 
-![[Vercel Deployment](https://vercel.com/button)](https://mate-tractors.vercel.app/)
-
-
 A comprehensive, full-stack web application designed to streamline tractor and agricultural equipment repair services with real-time order tracking, admin management, and customer engagement.
 
 ## Overview
@@ -33,23 +30,49 @@ repair-desk/
 
 ### Architecture Flow
 
-```
-┌─────────────┬─────────────┬─────────────┐
-│   Client    │    Admin    │   Server    │
-│ (Next.js)   │  (React)    │ (Express)   │
-└──────┬──────┴──────┬──────┴──────┬──────┘
-       │             │            │
-       └─────────────┼────────────┘
-                     │
-            ┌────────┴────────┐
-            │                 │
-         MongoDB           Redis
-        (Database)     (Cache/Socket)
+```mermaid
+graph TB
+    subgraph Applications["Applications"]
+        Client["Client<br/>(Next.js)"]
+        Admin["Admin<br/>(React)"]
+        Server["Server<br/>(Express)"]
+    end
+
+    subgraph Data["Data Layer"]
+        MongoDB["MongoDB<br/>(Database)"]
+        Redis["Redis<br/>(Cache/Socket)"]
+    end
+
+    Client -->|API Calls| Server
+    Admin -->|API Calls| Server
+    Server -->|Store/Query| MongoDB
+    Server -->|Cache & Pub/Sub| Redis
+    Client -->|WebSocket| Redis
+    Admin -->|WebSocket| Redis
 ```
 
 ## Technology Stack
 
-### Backend
+### Tech Stack Overview
+
+| Technology | Description | Role in Project |
+|:-:|:-:|:-:|
+| **![Node.js](https://skillicons.dev/icons?i=nodejs)**<br>Node.js | JavaScript runtime | Runs the Express backend server for APIs and real-time features |
+| **![Express](https://skillicons.dev/icons?i=express)**<br>Express | Web framework | Handles HTTP requests, routing, and WebSocket initialization |
+| **![MongoDB](https://skillicons.dev/icons?i=mongodb)**<br>MongoDB | NoSQL database | Stores users, orders, services, and app data |
+| **![Redis](https://skillicons.dev/icons?i=redis)**<br>Redis | In-memory data store | Enables caching, rate limiting, and Socket.IO scaling |
+| **![Socket.IO](https://img.shields.io/badge/Socket.io-black?style=for-the-badge&logo=socket.io&logoColor=white)**<br>Socket.IO | Real-time WebSocket library | Enables bi-directional communication for live updates |
+| **![React](https://skillicons.dev/icons?i=react)**<br>React | Frontend library | Builds the admin dashboard UI |
+| **![Vite](https://skillicons.dev/icons?i=vite)**<br>Vite | Frontend build tool | Fast dev server & bundler for React admin |
+| **![Next.js](https://skillicons.dev/icons?i=nextjs)**<br>Next.js | React framework | Builds the customer portal with SSR support |
+| **![TypeScript](https://skillicons.dev/icons?i=typescript)**<br>TypeScript | Type-safe language | Provides type safety in frontend code |
+| **![Tailwind CSS](https://skillicons.dev/icons?i=tailwind)**<br>Tailwind CSS | Utility-first CSS | Responsive styling across all applications |
+| **![Docker](https://skillicons.dev/icons?i=docker)**<br>Docker | Container platform | Containerizes services for consistent deployment |
+| **![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens)**<br>JWT | Authentication | Secure token-based authentication |
+| **![Git](https://skillicons.dev/icons?i=git)**<br>Git | Version control | Tracks code changes and collaboration |
+| **![GitHub](https://skillicons.dev/icons?i=github)**<br>GitHub | Code hosting | Repository management and CI/CD |
+
+### Backend Stack Details
 
 | Technology | Purpose | Version |
 |:-----------|:--------|:-------:|
@@ -64,7 +87,7 @@ repair-desk/
 | CORS | Cross-origin requests | v2.8.5 |
 | Rate Limiter | API rate limiting | flexible + redis |
 
-### Admin Dashboard
+### Admin Dashboard Stack Details
 
 | Technology | Purpose | Version |
 |:-----------|:--------|:-------:|
@@ -78,7 +101,7 @@ repair-desk/
 | jsPDF | PDF generation | v3.0.4 |
 | Axios | HTTP client | v1.13.2 |
 
-### Customer Portal
+### Customer Portal Stack Details
 
 | Technology | Purpose | Version |
 |:-----------|:--------|:-------:|
@@ -89,7 +112,441 @@ repair-desk/
 | React Icons | Icon library | Latest |
 | Next-intl | i18n for Next.js | Latest |
 
-## Project Structure
+## System Architecture Diagram
+
+```mermaid
+graph TB
+    subgraph Client["Client Applications"]
+        CP["Customer Portal<br/>(Next.js)"]
+        AD["Admin Dashboard<br/>(React + Vite)"]
+    end
+
+    subgraph Backend["Backend Services"]
+        API["Express API Server<br/>(Node.js)"]
+        AUTH["Authentication<br/>(JWT + bcryptjs)"]
+        SOCKET["Socket.IO Server<br/>(Real-time)"]
+    end
+
+    subgraph Data["Data Layer"]
+        DB["MongoDB<br/>(Primary DB)"]
+        CACHE["Redis<br/>(Cache/Pub-Sub)"]
+    end
+
+    subgraph Infrastructure["Infrastructure"]
+        DOCKER["Docker<br/>(Containerization)"]
+        LOGS["Logging<br/>(Winston/Morgan)"]
+    end
+
+    CP -->|REST API| API
+    AD -->|REST API| API
+    CP -->|WebSocket| SOCKET
+    AD -->|WebSocket| SOCKET
+    
+    API -->|Authenticate| AUTH
+    SOCKET -->|Authenticate| AUTH
+    
+    API -->|Query/Store| DB
+    DB -->|Caching| CACHE
+    SOCKET -->|Pub/Sub| CACHE
+    
+    API -->|Logs| LOGS
+    SOCKET -->|Logs| LOGS
+    
+    API -->|Runs In| DOCKER
+    DB -->|Runs In| DOCKER
+    CACHE -->|Runs In| DOCKER
+    
+    style CP fill:#3B82F6,stroke:#1F2937,stroke-width:2px,color:#fff
+    style AD fill:#8B5CF6,stroke:#1F2937,stroke-width:2px,color:#fff
+    style API fill:#10B981,stroke:#1F2937,stroke-width:2px,color:#fff
+    style AUTH fill:#F59E0B,stroke:#1F2937,stroke-width:2px,color:#fff
+    style SOCKET fill:#EC4899,stroke:#1F2937,stroke-width:2px,color:#fff
+    style DB fill:#EF4444,stroke:#1F2937,stroke-width:2px,color:#fff
+    style CACHE fill:#FF6B35,stroke:#1F2937,stroke-width:2px,color:#fff
+    style DOCKER fill:#1F2937,stroke:#6B7280,stroke-width:2px,color:#fff
+    style LOGS fill:#6366F1,stroke:#1F2937,stroke-width:2px,color:#fff
+```
+
+## Database Entity Relationship Diagram
+
+```mermaid
+erDiagram
+    USERS ||--o{ SERVICE_ORDERS : places
+    USERS ||--o{ CUSTOMER_PROFILES : has
+    ADMINS ||--o{ SERVICE_ORDERS : manages
+    ADMINS ||--o{ SERVICE_CATALOG : manages
+    ADMINS ||--o{ PARTS_CATALOG : manages
+    SERVICE_ORDERS ||--|{ SERVICE_CATALOG : requests
+    SERVICE_ORDERS ||--o{ PARTS_INVENTORY : uses
+    SERVICE_CATALOG ||--o{ SERVICE_CATEGORIES : belongs_to
+    PARTS_INVENTORY ||--o{ PARTS_CATEGORIES : belongs_to
+    SERVICE_ORDERS ||--o{ ORDER_HISTORY : tracks
+    NOTIFICATIONS ||--o{ USERS : informs
+    
+    USERS {
+        ObjectId _id PK
+        string firstName
+        string lastName
+        string email UK
+        string phone
+        string address
+        string passwordHash
+        date createdAt
+        date updatedAt
+    }
+    
+    CUSTOMER_PROFILES {
+        ObjectId _id PK
+        ObjectId userId FK
+        string businessName
+        string location
+        string tractorModels
+        date lastServiceDate
+    }
+    
+    ADMINS {
+        ObjectId _id PK
+        string email UK
+        string name
+        string role
+        string passwordHash
+        boolean isActive
+        date createdAt
+    }
+    
+    SERVICE_ORDERS {
+        ObjectId _id PK
+        ObjectId customerId FK
+        ObjectId adminId FK
+        array serviceIds
+        array parts
+        enum status
+        float totalPrice
+        string description
+        date createdAt
+        date completedAt
+    }
+    
+    SERVICE_CATALOG {
+        ObjectId _id PK
+        ObjectId adminId FK
+        string name
+        string description
+        float price
+        int duration
+        boolean isActive
+        date createdAt
+    }
+    
+    SERVICE_CATEGORIES {
+        ObjectId _id PK
+        string name
+        string description
+    }
+    
+    PARTS_INVENTORY {
+        ObjectId _id PK
+        ObjectId adminId FK
+        string name
+        string description
+        float price
+        int stock
+        int minimumStock
+        string category
+    }
+    
+    PARTS_CATEGORIES {
+        ObjectId _id PK
+        string name
+        string code
+    }
+    
+    ORDER_HISTORY {
+        ObjectId _id PK
+        ObjectId orderId FK
+        enum status
+        string changedBy
+        string notes
+        date timestamp
+    }
+    
+    NOTIFICATIONS {
+        ObjectId _id PK
+        ObjectId userId FK
+        string type
+        string message
+        boolean isRead
+        date createdAt
+    }
+```
+
+## Request-Response Flow Diagram
+
+```mermaid
+flowchart LR
+    subgraph Client["Client Applications"]
+        CPortal["Customer Portal<br/>(Next.js)"]
+        APortal["Admin Portal<br/>(React)"]
+    end
+    
+    subgraph Middleware["Middleware Pipeline"]
+        CORS["CORS"]
+        PARSER["JSON Parser"]
+        RATE["Rate Limit"]
+        AUTH["JWT Auth"]
+    end
+    
+    subgraph Routes["API Routes"]
+        AuthAPI["/api/auth"]
+        OrderAPI["/api/orders"]
+        ServiceAPI["/api/services"]
+        PartAPI["/api/parts"]
+        DataAPI["/api/data"]
+    end
+    
+    subgraph Controllers["Controllers"]
+        AuthCTRL["Auth"]
+        OrderCTRL["Order"]
+        ServiceCTRL["Service"]
+        PartCTRL["Part"]
+        DataCTRL["Data"]
+    end
+    
+    subgraph Models["Data Models"]
+        UserMDL["User"]
+        OrderMDL["Order"]
+        ServiceMDL["Service"]
+        PartMDL["Part"]
+    end
+    
+    subgraph DB["Database"]
+        MongoDB["MongoDB"]
+    end
+    
+    CPortal -->|HTTP/WS| CORS
+    APortal -->|HTTP/WS| CORS
+    CORS --> PARSER
+    PARSER --> RATE
+    RATE --> AUTH
+    AUTH --> AuthAPI
+    AUTH --> OrderAPI
+    AUTH --> ServiceAPI
+    AUTH --> PartAPI
+    AUTH --> DataAPI
+    
+    AuthAPI --> AuthCTRL
+    OrderAPI --> OrderCTRL
+    ServiceAPI --> ServiceCTRL
+    PartAPI --> PartCTRL
+    DataAPI --> DataCTRL
+    
+    AuthCTRL --> UserMDL
+    OrderCTRL --> OrderMDL
+    ServiceCTRL --> ServiceMDL
+    PartCTRL --> PartMDL
+    
+    UserMDL --> MongoDB
+    OrderMDL --> MongoDB
+    ServiceMDL --> MongoDB
+    PartMDL --> MongoDB
+    
+    style CPortal fill:#3B82F6,color:#fff
+    style APortal fill:#8B5CF6,color:#fff
+    style CORS fill:#F59E0B,color:#fff
+    style AUTH fill:#EC4899,color:#fff
+    style AuthAPI fill:#10B981,color:#fff
+    style OrderAPI fill:#10B981,color:#fff
+    style MongoDB fill:#EF4444,color:#fff
+```
+
+## Component Architecture Diagram
+
+```mermaid
+graph TB
+    subgraph Frontend["Frontend Layer"]
+        subgraph CPortal["Customer Portal (Next.js)"]
+            CPAuth["Auth Module"]
+            CPOrder["Order Module"]
+            CPTrack["Tracking Module"]
+            CPProfile["Profile Module"]
+        end
+        
+        subgraph APortal["Admin Dashboard (React)"]
+            APAuth["Admin Auth"]
+            APDash["Dashboard"]
+            APOrder["Order Mgmt"]
+            APService["Service Mgmt"]
+            APParts["Parts Mgmt"]
+            APReports["Reports"]
+        end
+    end
+    
+    subgraph Integration["Integration Layer"]
+        REST["REST API"]
+        WS["WebSocket"]
+        EVENTS["Event Bus"]
+    end
+    
+    subgraph Backend["Backend Layer"]
+        AUTH["Auth Service"]
+        ORDER["Order Service"]
+        SERVICE["Service Service"]
+        PART["Part Service"]
+        NOTIF["Notification Service"]
+    end
+    
+    subgraph Cache["Caching Layer"]
+        REDIS["Redis Store"]
+        SESSION["Sessions"]
+    end
+    
+    subgraph Persistence["Persistence Layer"]
+        MONGO["MongoDB"]
+        LOGS["Logs"]
+    end
+    
+    CPAuth -->|HTTP| REST
+    CPOrder -->|HTTP| REST
+    CPTrack -->|WS| WS
+    CPProfile -->|HTTP| REST
+    
+    APortal -->|HTTP| REST
+    APortal -->|WS| WS
+    
+    REST --> AUTH
+    REST --> ORDER
+    REST --> SERVICE
+    REST --> PART
+    REST --> NOTIF
+    
+    WS -->|Subscribe| EVENTS
+    EVENTS -->|Broadcast| PART
+    EVENTS -->|Broadcast| ORDER
+    EVENTS -->|Broadcast| NOTIF
+    
+    AUTH -->|Cache| REDIS
+    ORDER -->|Cache| REDIS
+    SERVICE -->|Cache| REDIS
+    PART -->|Cache| REDIS
+    
+    AUTH -->|Store| MONGO
+    ORDER -->|Store| MONGO
+    SERVICE -->|Store| MONGO
+    PART -->|Store| MONGO
+    NOTIF -->|Store| MONGO
+    
+    ORDER -->|Log| LOGS
+    AUTH -->|Log| LOGS
+    
+    style CPAuth fill:#3B82F6,color:#fff
+    style CPOrder fill:#3B82F6,color:#fff
+    style APortal fill:#8B5CF6,color:#fff
+    style REST fill:#10B981,color:#fff
+    style WS fill:#EC4899,color:#fff
+    style AUTH fill:#F59E0B,color:#fff
+    style REDIS fill:#FF6B35,color:#fff
+    style MONGO fill:#EF4444,color:#fff
+```
+
+## Technology Integration Flow
+
+```mermaid
+graph TB
+    subgraph Input["User Input"]
+        WEB["Web Browser"]
+        MOBILE["Mobile App"]
+    end
+    
+    subgraph Transport["Transport Layer"]
+        HTTP["HTTP/HTTPS"]
+        WS["WebSocket (Secure)"]
+    end
+    
+    subgraph Processing["Server Processing"]
+        PARSER["Request Parser"]
+        VALIDATOR["Input Validation"]
+        RATELIMIT["Rate Limiting"]
+        AUTH["Authentication"]
+        PROCESSOR["Business Logic"]
+    end
+    
+    subgraph Storage["Storage Layer"]
+        CACHE["Redis Cache"]
+        PRIMARY["MongoDB"]
+        LOGS["Logging"]
+    end
+    
+    subgraph Response["Response"]
+        SERIALIZE["Serialize"]
+        COMPRESS["Compress"]
+        BROADCAST["Broadcast Events"]
+        RETURN["Return Response"]
+    end
+    
+    WEB --> HTTP
+    MOBILE --> WS
+    HTTP --> PARSER
+    WS --> PARSER
+    PARSER --> VALIDATOR
+    VALIDATOR --> RATELIMIT
+    RATELIMIT --> AUTH
+    AUTH --> PROCESSOR
+    PROCESSOR -->|Check| CACHE
+    CACHE -->|Hit| SERIALIZE
+    PROCESSOR -->|Miss| PRIMARY
+    PRIMARY --> PROCESSOR
+    PROCESSOR -->|Log| LOGS
+    PROCESSOR --> BROADCAST
+    BROADCAST --> SERIALIZE
+    SERIALIZE --> COMPRESS
+    COMPRESS --> RETURN
+    RETURN --> WEB
+    RETURN --> MOBILE
+    
+    style WS fill:#EC4899,color:#fff
+    style HTTP fill:#3B82F6,color:#fff
+    style PROCESSOR fill:#10B981,color:#fff
+    style CACHE fill:#FF6B35,color:#fff
+    style PRIMARY fill:#EF4444,color:#fff
+    style AUTH fill:#F59E0B,color:#fff
+```
+
+## Data Flow Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant User as User<br/>(Client Portal)
+    participant Admin as Admin<br/>(Admin Panel)
+    participant API as Express API
+    participant AUTH as Auth Service
+    participant Cache as Redis
+    participant DB as MongoDB
+    participant Socket as Socket.IO
+    
+    User->>API: POST /api/orders (Create Order)
+    API->>AUTH: Verify JWT Token
+    AUTH-->>API: Token Valid
+    API->>Cache: Check Rate Limit
+    Cache-->>API: OK
+    API->>DB: Save Order to MongoDB
+    DB-->>API: Order ID: 123
+    API->>Cache: Publish Event (order:created)
+    Cache->>Socket: Broadcast to Subscribers
+    Socket-->>Admin: New Order Notification
+    Socket-->>User: Order Confirmation
+    API-->>User: 200 OK (Order ID: 123)
+    
+    Note over Admin: Admin Reviews Order
+    Admin->>API: PATCH /api/orders/123 (Update Status)
+    API->>AUTH: Verify Admin Token
+    AUTH-->>API: Token Valid
+    API->>DB: Update Order Status
+    DB-->>API: Updated
+    API->>Cache: Publish Event (order:updated)
+    Cache->>Socket: Broadcast Status Change
+    Socket-->>User: Order Status: In Progress
+    API-->>Admin: 200 OK (Update Complete)
+```
 
 ### Backend (server/)
 
@@ -196,70 +653,68 @@ client/
 
 ## Core Features
 
-### Customer Features (Client Portal)
+### Feature Architecture Diagram
 
-1. Service Request Form: Easy-to-use form to request tractor repairs
-2. Service Locator: Find nearby repair centers
-3. Live Chat Support: Direct communication with service center
-4. Order Tracking: Real-time tracking of repair orders
-5. Notifications: Updates on order status
-6. Customer Profile: Manage account and service history
-7. Mobile Responsive: Works seamlessly on all devices
-8. Multi-Language: English and Marathi language support
-
-### Admin Features (Admin Dashboard)
-
-1. Dashboard: Comprehensive business analytics and KPIs
-2. Admin Management: User roles and permissions
-3. Order Management:
-   - Create, assign, and track service orders
-   - Real-time status updates
-   - Order history and details
-   - PDF report generation
-4. Service Catalog Management:
-   - Add, edit, and delete tractor services
-   - Service pricing and descriptions
-   - Service availability management
-5. Parts Inventory:
-   - Track available spare parts
-   - Parts pricing and stock management
-   - Low-stock alerts
-6. Customer Management:
-   - Customer database and profiles
-   - Service history
-   - Contact information
-7. Mobile App Integration: Support for mobile service representatives
-8. Reports and Analytics:
-   - Revenue reports
-   - Service completion rates
-   - Customer satisfaction metrics
-   - PDF export functionality
-9. Secure Access: JWT-based authentication
-10. Multi-Language Dashboard: English and Marathi
-
-### Security Features
-
-- JWT Authentication: Secure token-based auth
-- Password Encryption: bcryptjs hashing
-- Helmet.js: HTTP security headers
-- Rate Limiting: Protection against brute force attacks
-- Redis-based Rate Limiting: Efficient rate limiting
-- Role-Based Access Control: Different permission levels
-- CORS Protection: Cross-origin security
-
-### Real-Time Features
-
-- Socket.IO Integration: Real-time order updates
-- Redis Adapter: Scalable WebSocket communication
-- Live Notifications: Instant status updates
-- Multi-User Support: Concurrent connections
-
-### Data Management
-
-- MongoDB: Flexible, scalable database
-- Collections: Organized data structure
-- Advanced Filtering: Search and filter capabilities
-- Data Analytics: Comprehensive reporting
+```mermaid
+graph TB
+    subgraph Customer["Customer Features (Client Portal)"]
+        SR["Service Request Form"]
+        SL["Service Locator"]
+        LC["Live Chat Support"]
+        OT["Order Tracking"]
+        NT["Notifications"]
+        CP["Customer Profile"]
+        MR["Mobile Responsive"]
+        ML["Multi-Language"]
+    end
+    
+    subgraph Admin["Admin Features (Admin Dashboard)"]
+        DB["Dashboard Analytics"]
+        AM["Admin Management"]
+        OM["Order Management"]
+        SM["Service Catalog"]
+        PI["Parts Inventory"]
+        CM["Customer Management"]
+        MI["Mobile Int egration"]
+        RA["Reports Analytics"]
+    end
+    
+    subgraph Security["Security Features"]
+        JWT["JWT Auth"]
+        PE["Password Encryption"]
+        HE["HTTP Headers"]
+        RL["Rate Limiting"]
+        RBAC["Role-Based Access"]
+        CORS["CORS Protection"]
+    end
+    
+    subgraph RealTime["Real-Time Features"]
+        SIO["Socket.IO Integration"]
+        RA_RT["Redis Adapter"]
+        LN["Live Notifications"]
+        MU["Multi-User Support"]
+    end
+    
+    subgraph Data["Data Management"]
+        MDB["MongoDB"]
+        COL["Collections"]
+        AF["Advanced Filtering"]
+        DA["Data Analytics"]
+    end
+    
+    Customer --> SIO
+    Admin --> SIO
+    Customer --> JWT
+    Admin --> JWT
+    SIO --> RA_RT
+    RA_RT --> MDB
+    
+    style Customer fill:#3B82F6,color:#fff
+    style Admin fill:#8B5CF6,color:#fff
+    style Security fill:#EF4444,color:#fff
+    style RealTime fill:#EC4899,color:#fff
+    style Data fill:#F59E0B,color:#fff
+```
 
 ## Getting Started
 
@@ -426,64 +881,127 @@ GET    /api/data/statistics         Business statistics
 
 ## Database Schema Overview
 
-### Users Collection
+The database uses MongoDB with the following entity relationships:
 
-```javascript
-{
-  _id: ObjectId,
-  firstName: String,
-  lastName: String,
-  email: String (unique),
-  phone: String,
-  address: String,
-  password: String (hashed),
-  createdAt: Date,
-  updatedAt: Date
-}
+```mermaid
+erDiagram
+    USERS ||--o{ SERVICE_ORDERS : places
+    USERS ||--o{ CUSTOMER_PROFILES : has
+    ADMINS ||--o{ SERVICE_ORDERS : manages
+    ADMINS ||--o{ SERVICE_CATALOG : manages
+    ADMINS ||--o{ PARTS_CATALOG : manages
+    SERVICE_ORDERS ||--|{ SERVICE_CATALOG : requests
+    SERVICE_ORDERS ||--o{ PARTS_INVENTORY : uses
+    SERVICE_CATALOG ||--o{ SERVICE_CATEGORIES : belongs_to
+    PARTS_INVENTORY ||--o{ PARTS_CATEGORIES : belongs_to
+    SERVICE_ORDERS ||--o{ ORDER_HISTORY : tracks
+    NOTIFICATIONS ||--o{ USERS : informs
+    
+    USERS {
+        ObjectId _id PK
+        string firstName
+        string lastName
+        string email UK
+        string phone
+        string address
+        string passwordHash
+        date createdAt
+        date updatedAt
+    }
+    
+    CUSTOMER_PROFILES {
+        ObjectId _id PK
+        ObjectId userId FK
+        string businessName
+        string location
+        string tractorModels
+        date lastServiceDate
+    }
+    
+    ADMINS {
+        ObjectId _id PK
+        string email UK
+        string name
+        string role
+        string passwordHash
+        boolean isActive
+        date createdAt
+    }
+    
+    SERVICE_ORDERS {
+        ObjectId _id PK
+        ObjectId customerId FK
+        ObjectId adminId FK
+        array serviceIds
+        array parts
+        enum status
+        float totalPrice
+        string description
+        date createdAt
+        date completedAt
+    }
+    
+    SERVICE_CATALOG {
+        ObjectId _id PK
+        ObjectId adminId FK
+        string name
+        string description
+        float price
+        int duration
+        boolean isActive
+        date createdAt
+    }
+    
+    SERVICE_CATEGORIES {
+        ObjectId _id PK
+        string name
+        string description
+    }
+    
+    PARTS_INVENTORY {
+        ObjectId _id PK
+        ObjectId adminId FK
+        string name
+        string description
+        float price
+        int stock
+        int minimumStock
+        string category
+    }
+    
+    PARTS_CATEGORIES {
+        ObjectId _id PK
+        string name
+        string code
+    }
+    
+    ORDER_HISTORY {
+        ObjectId _id PK
+        ObjectId orderId FK
+        enum status
+        string changedBy
+        string notes
+        date timestamp
+    }
+    
+    NOTIFICATIONS {
+        ObjectId _id PK
+        ObjectId userId FK
+        string type
+        string message
+        boolean isRead
+        date createdAt
+    }
 ```
 
-### ServiceOrder Collection
+### Key Relationships
 
-```javascript
-{
-  _id: ObjectId,
-  customerId: ObjectId,
-  services: [ObjectId],
-  parts: [{ partId, quantity, price }],
-  status: Enum(pending, in-progress, completed),
-  totalPrice: Number,
-  description: String,
-  assignedAdmin: ObjectId,
-  createdAt: Date,
-  completedAt: Date
-}
-```
-
-### Service Collection
-
-```javascript
-{
-  _id: ObjectId,
-  name: String,
-  description: String,
-  price: Number,
-  duration: Number,
-  isActive: Boolean
-}
-```
-
-### Parts Collection
-
-```javascript
-{
-  _id: ObjectId,
-  name: String,
-  description: String,
-  price: Number,
-  stock: Number,
-  category: String
-}
-```
+- **USERS** → Places SERVICE_ORDERS and receives NOTIFICATIONS
+- **ADMINS** → Manages SERVICE_ORDERS, SERVICE_CATALOG, and PARTS_CATALOG
+- **SERVICE_ORDERS** → Links customers with services, tracks order history, and manages parts usage
+- **SERVICE_CATALOG** → Organized by SERVICE_CATEGORIES
+- **PARTS_INVENTORY** → Managed by categories and used in SERVICE_ORDERS
+- **ORDER_HISTORY** → Maintains audit trail of status changes
 
 ## Real-Time Updates with Socket.IO
 
@@ -560,62 +1078,99 @@ pnpm run build
 
 ## Dependencies Summary
 
-### Backend Dependencies
+### Dependencies Architecture Diagram
 
-Security and Authentication:
-- jsonwebtoken - JWT implementation
-- bcryptjs - Password hashing
-- helmet - HTTP security
-- cookie-parser - Cookie handling
-
-Database and Caching:
-- mongoose - MongoDB ODM
-- ioredis - Redis client
-- @socket.io/redis-streams-adapter - Socket.IO Redis adapter
-
-API and Networking:
-- express - Web framework
-- cors - Cross-origin handling
-- axios - HTTP client
-- socket.io - Real-time communication
-
-Rate Limiting and Monitoring:
-- express-rate-limit - Rate limiting middleware
-- rate-limit-redis - Redis rate store
-
-Utilities:
-- dotenv - Environment variables
-- chalk - Terminal colors
-- body-parser - Request body parsing
-
-### Frontend Dependencies
-
-React Ecosystem:
-- react - UI library
-- react-dom - React DOM binding
-- react-query - Server state management
-- react-router - Routing
-
-UI and Styling:
-- tailwindcss - Utility-first CSS
-- framer-motion - Animations
-- radix-ui - Component library
-- lucide-react - Icon library
-- react-icons - Additional icons
-
-Build Tools:
-- vite - Fast build tool
-- next.js - React framework
-
-Internationalization:
-- i18next - i18n framework
-- next-intl - Next.js i18n
-
-Utilities:
-- axios - HTTP client
-- clsx - Conditional className utility
-- jsPDF - PDF generation
-- clsx - Conditional CSS classes
+```mermaid
+graph TB
+    subgraph Backend["Backend Dependencies"]
+        subgraph Auth["Security/Auth"]
+            JWT["jsonwebtoken"]
+            BCRYPT["bcryptjs"]
+            HELMET["helmet"]
+            CP["cookie-parser"]
+        end
+        
+        subgraph DB["Database/Cache"]
+            MONGOOSE["mongoose"]
+            IOREDIS["ioredis"]
+            SIOREDIS["socket.io-redis-adapter"]
+        end
+        
+        subgraph API["API/Networking"]
+            EXPRESS["express"]
+            CORS_PKG["cors"]
+            AXIOS_BE["axios"]
+            SIO["socket.io"]
+        end
+        
+        subgraph Limit["Rate Limiting"]
+            RATELIMIT["express-rate-limit"]
+            RLREDIS["rate-limit-redis"]
+        end
+        
+        subgraph Utils["Utilities"]
+            DOTENV["dotenv"]
+            CHALK["chalk"]
+            BP["body-parser"]
+        end
+    end
+    
+    subgraph Frontend["Frontend Dependencies"]
+        subgraph React["React Ecosystem"]
+            REACT["react"]
+            REACTDOM["react-dom"]
+            RQ["react-query"]
+            RR["react-router"]
+        end
+        
+        subgraph Style["UI/Styling"]
+            TC["tailwindcss"]
+            FM["framer-motion"]
+            RUI["radix-ui"]
+            LR["lucide-react"]
+            RI["react-icons"]
+        end
+        
+        subgraph Build["Build Tools"]
+            VITE["vite"]
+            NEXT["next.js"]
+        end
+        
+        subgraph I18n["Internationalization"]
+            I18NEXT["i18next"]
+            NINTL["next-intl"]
+        end
+        
+        subgraph FUtils["Utilities"]
+            AXIOS_FE["axios"]
+            CLSX["clsx"]
+            JSPDF["jsPDF"]
+        end
+    end
+    
+    JWT --> Express
+    BCRYPT --> JWT
+    HELMET --> EXPRESS
+    MONGOOSE --> DB
+    IOREDIS --> DB
+    EXPRESS --> SIO
+    SIO --> IOREDIS
+    RATELIMIT --> RLREDIS
+    
+    REACT --> RQ
+    REACT --> VITE
+    TC --> FM
+    RUI --> LR
+    NEXT --> AXIOS_FE
+    I18NEXT --> NINTL
+    
+    style Auth fill:#EF4444,color:#fff
+    style DB fill:#F59E0B,color:#fff
+    style API fill:#10B981,color:#fff
+    style React fill:#3B82F6,color:#fff
+    style Style fill:#8B5CF6,color:#fff
+    style Build fill:#06B6D4,color:#fff
+```
 
 ## Contributing
 
@@ -669,7 +1224,3 @@ Found a bug? Have a suggestion?
 ## Summary
 
 Repair Desk is a complete solution for agricultural equipment service management. With its modern tech stack, real-time capabilities, and comprehensive feature set, it provides everything needed to run an efficient repair service business. The modular architecture ensures scalability, while the focus on security and user experience makes it suitable for businesses of any size.
-
-For more information, visit the project repository or contact the development team.
-
-Made with dedication for farmers and repair technicians.
