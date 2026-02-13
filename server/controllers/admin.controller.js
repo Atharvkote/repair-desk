@@ -1,5 +1,8 @@
 import adminModel from "../models/admin.model.js";
 import logger from "../utils/logger.js";
+import jwt from "jsonwebtoken";
+import { publicKey } from "../configs/jwt.config.js";
+import "dotenv/config";
 
 const createAdmin = async (req, res) => {
   try {
@@ -148,22 +151,19 @@ const checkAuth = (req, res) => {
 
 const refreshToken = async (req, res) => {
   try {
-    const { refreshToken } = req.body;
+    const { refreshToken: token } = req.body;
 
-    if (!refreshToken) {
+    if (!token) {
       return res.status(400).json({
         success: false,
         message: "Refresh token is required",
       });
     }
 
-    // Verify refresh token
-    const jwt = (await import("jsonwebtoken")).default;
-    const { publicKey } = await import("../configs/jwt.config.js");
-
+    // Verify refresh token using public key (RS256)
     let decoded;
     try {
-      decoded = jwt.verify(refreshToken, publicKey, {
+      decoded = jwt.verify(token, publicKey, {
         algorithms: ["RS256"],
         issuer: "repair-desk-admin",
         audience: "repair-desk-api",
@@ -175,6 +175,7 @@ const refreshToken = async (req, res) => {
           message: "Refresh token expired",
         });
       }
+      logger.error(`Token refresh failed: ${error.message}`);
       return res.status(401).json({
         success: false,
         message: "Invalid refresh token",
@@ -207,6 +208,7 @@ const refreshToken = async (req, res) => {
       refreshToken: newRefreshToken,
     });
   } catch (error) {
+    logger.error(`Token refresh error: ${error.message}`);
     res.status(500).json({
       success: false,
       message: error.message,

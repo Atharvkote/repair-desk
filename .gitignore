@@ -30,17 +30,20 @@ build/
 .*.env
 .env.local
 
-server/.env
 
 # =========================
-# Secrets / Keys
+# Secrets / Keys (NEVER commit these!)
 # =========================
-# *.pem
-# server/keys/
-# .key*
-# *.crt
-# *.private.key
-# *.public.key
+*.pem
+*.key
+*.crt
+server/keys/
+.key*
+.crt*
+*.private.key
+*.public.key
+admin_private.key
+admin_public.key
 
 # =========================
 # Logs & Debug
@@ -60,10 +63,20 @@ yarn-error.log*
 # =========================
 .vercel
 
+
+*.key
+*.pem
+*.crt
+
+keys/admin_private.key
+keys/admin_public.key
+*.key
+*.pem
 # =========================
 # TypeScript
 # =========================
 *.tsbuildinfo
 next-env.d.ts
-server/.env
+
 # server/keys/admin_private.key
+server/.env
