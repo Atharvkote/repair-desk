@@ -27,14 +27,14 @@ coverage
 .env.local
 
 
-*.key
-*.pem
-*.crt
+# *.key
+# *.pem
+# *.crt
 
-keys/admin_private.key
-keys/admin_public.key
-*.key
-*.pem
+# keys/admin_private.key
+# keys/admin_public.key
+# *.key
+# *.pem
 
 # nyc test coverage
 .nyc_output

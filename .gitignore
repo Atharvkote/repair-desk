@@ -35,12 +35,12 @@ server/.env
 # =========================
 # Secrets / Keys
 # =========================
-*.pem
-server/keys/
-.key*
-*.crt
-*.private.key
-*.public.key
+# *.pem
+# server/keys/
+# .key*
+# *.crt
+# *.private.key
+# *.public.key
 
 # =========================
 # Logs & Debug
@@ -66,4 +66,4 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 server/.env
-server/keys/admin_private.key
+# server/keys/admin_private.key
