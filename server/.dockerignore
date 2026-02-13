@@ -19,3 +19,6 @@ coverage
 .swp
 .swo
 *~
+
+admin_public.key
+admin_private.key
