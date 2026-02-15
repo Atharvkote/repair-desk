@@ -1,8 +1,18 @@
 # Repair Desk 
 
+<div align="center">
+    <img src="https://res.cloudinary.com/dgz7hqbl9/image/upload/v1771152172/white-logo_umunxc.png" height="200" width="200" />
+</div>
+
 A comprehensive, full-stack web application designed to streamline tractor and agricultural equipment repair services with real-time order tracking, admin management, and customer engagement.
 
 ## Overview
+
+
+<div align="center">
+    <img src="https://res.cloudinary.com/dgz7hqbl9/image/upload/v1771152341/Screenshot_2026-02-15_161136_q0bquf.png"  />
+</div>
+
 
 Repair Desk is a modern, scalable service management platform specifically built for agricultural equipment repair businesses. It provides a complete ecosystem for managing service orders, tracking repairs, managing inventory of parts, and maintaining customer relationships - all in one integrated platform.
 
