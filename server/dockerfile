@@ -3,20 +3,21 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app/server
 
-RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
+RUN corepack enable && corepack prepare pnpm@10.18.0 --activate
 
-COPY ./package.json ./pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile --prod
+
+COPY . .
 
 # ---------- Production stage ----------
 FROM node:20-alpine
 
 WORKDIR /app/server
 
-RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
-
 COPY --from=builder /app/server/node_modules ./node_modules
-COPY . ./
+COPY --from=builder /app/server/package.json ./
+COPY --from=builder /app/server ./
 
 EXPOSE 5000
 
