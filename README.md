@@ -3,7 +3,26 @@
 <div align="center">
     <img src="https://res.cloudinary.com/dgz7hqbl9/image/upload/v1771152172/white-logo_umunxc.png" height="200" width="200" />
 </div>
+<br/>
 
+
+<p align="center">
+  <a href="https://github.com/Atharvkote/repair-desk/actions/workflows/docker-build.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/Atharvkote/repair-desk/docker-build.yml?branch=main&label=Docker%20Build&logo=docker" />
+  </a>
+  &nbsp;
+  <img src="https://img.shields.io/badge/docker-ready-blue" alt="Docker Ready">
+  &nbsp;
+  <img src="https://img.shields.io/badge/security-trivy-green" alt="Trivy Scan">
+  &nbsp;
+  <a href="https://github.com/Atharvkote/repair-desk/actions/workflows/docker-build.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/Atharvkote/repair-desk/docker-build.yml?branch=main&label=Vercel%20Deployed&logo=vercel" />
+  </a>
+  &nbsp;
+</p>
+
+
+<br/>
 A comprehensive, full-stack web application designed to streamline tractor and agricultural equipment repair services with real-time order tracking, admin management, and customer engagement.
 
 ## Overview
