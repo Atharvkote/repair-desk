@@ -27,3 +27,5 @@ router.patch("/:id", adminAuthMiddleware, updateAdmin);
 router.delete("/:id", adminAuthMiddleware, deleteAdmin);
 
 export default router;
+
+//admin
