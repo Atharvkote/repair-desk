@@ -1240,9 +1240,16 @@ This project is licensed under the ISC License - see the LICENSE file for detail
 
 Found a bug? Have a suggestion?
 
-- Email: support@repairdesk.com
-- GitHub Issues: https://github.com/yourusername/repair-desk/issues
-- GitHub Discussions: https://github.com/yourusername/repair-desk/discussions
+- Emails:
+  - [atharvkote3@gmail.com](mailto:atharvkote3@gmail.com)
+  - [nannawareyash046@gmail.com](mailto:nannawareyash046@gmail.com)
+  - [naikwadesairaj@gmail.com](mailto:naikwadesairaj@gmail.com)
+  - [kordebhushan6140@gmail.com](mailto:kordebhushan6140@gmail.com)
+  - [pranavmulay2005@gmail.com](mailto:pranavmulay2005@gmail.com)
+  - [atharvanarkhede969@gmail.com](mailto:atharvanarkhede969@gmail.com)
+
+- GitHub Issues: https://github.com/Atharvkote/repair-desk/issues
+- GitHub Discussions: https://github.com/Atharvkote/repair-desk/discussions
 
 ## Acknowledgments
 
